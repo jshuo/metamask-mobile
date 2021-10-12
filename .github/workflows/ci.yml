@@ -5,7 +5,7 @@ on:
       - '**.md'
   push:    
     branches:
-      - feature/*
+      - '*'
     paths-ignore:
       - '**.md'
 jobs:
@@ -13,10 +13,8 @@ jobs:
     name: Yarn Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: borales/actions-yarn@1.22.5
-        with:
-          cmd: install
-      - uses: borales/actions-yarn@1.22.5
-        with:
-          cmd: lint
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: npm install
