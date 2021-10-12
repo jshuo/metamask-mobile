@@ -1,5 +1,13 @@
 name: CI
-on: [push]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:    
+    branches:
+      - feature/*
+    paths-ignore:
+      - '**.md'
 jobs:
   Yarn-Lint:
     name: Yarn Lint
