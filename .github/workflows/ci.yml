@@ -1,0 +1,14 @@
+name: CI
+on: [push]
+jobs:
+  Yarn-Lint:
+    name: Yarn Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@1.22.5
+        with:
+          cmd: install
+      - uses: borales/actions-yarn@1.22.5
+        with:
+          cmd: lint
