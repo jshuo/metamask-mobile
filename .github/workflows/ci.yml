@@ -5,7 +5,7 @@ on:
       - '**.md'
   push:    
     branches:
-      - '*'
+      - feature/*
     paths-ignore:
       - '**.md'
 jobs:
