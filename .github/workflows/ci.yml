@@ -1,3 +1,4 @@
+---
 name: CI
 on:
   pull_request:
@@ -13,9 +14,9 @@ jobs:
     name: Yarn Install
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: bahmutov/npm-install@v1
-      with:
-        install-command: install --network-timeout 300000 --frozen-lockfile --network-concurrency 1
-    - run: yarn install
-    - run: yarn lint
+      - uses: actions/checkout@v2
+      - uses: bahmutov/npm-install@v1
+        with:
+          install-command: install --network-timeout 300000 --frozen-lockfile --network-concurrency 1
+      - run: yarn install
+      - run: yarn lint
