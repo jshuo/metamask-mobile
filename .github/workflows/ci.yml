@@ -3,18 +3,17 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-  push:    
-    branches:
-      - feature/*
+  push:
     paths-ignore:
       - '**.md'
 jobs:
   Yarn-Lint:
-    name: Yarn Lint
+    name: Yarn Install
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - uses: bahmutov/npm-install@v1
       with:
-        node-version: '14'
-    - run: npm install
+        install-command: install --network-timeout 300000 --frozen-lockfile --network-concurrency 1
+    - run: yarn install
+    - run: yarn lint
