@@ -8,7 +8,7 @@ exports[`TransactionElement should render correctly 1`] = `
     Object {
       "0xbar": Object {
         "address": "0x0",
-        "importTime": 123,
+        "importTime": 1503187200000,
         "name": "Account 1",
       },
     }
