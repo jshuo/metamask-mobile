@@ -1,20 +1,17 @@
----
 name: CI
-on:
-  pull_request:
-    paths-ignore:
-      - '**.md'
-  push:
-    branches:
-      - feature/*
-    paths-ignore:
-      - '**.md'
+on: [push]
 jobs:
-  Yarn-Lint:
-    name: Yarn Install
+  build:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: bahmutov/npm-install@v1
+      - uses: borales/actions-yarn@v2.3.0
         with:
-          install-command: yarn --frozen-lockfile --silent
+          cmd: install # will run `yarn install` command
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: build # will run `yarn build` command
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: test # will run `yarn test` command
