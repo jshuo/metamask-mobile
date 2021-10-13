@@ -4,6 +4,8 @@ on:
     paths-ignore:
       - '**.md'
   push:
+    branches:
+      - feature/*
     paths-ignore:
       - '**.md'
 jobs:
