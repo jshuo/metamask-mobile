@@ -1,10 +1,8 @@
 process.env.TZ = 'America/Toronto';
 
 const config = {
-	testEnvironment: 'node',
 	preset: 'react-native',
 	setupFiles: ['<rootDir>/app/util/testSetup.js'],
-	// globalTeardown: '<rootDir>/app/util/testTeardown.js',
 	transform: {
 		'^.+\\.js$': '<rootDir>jest.preprocessor.js',
 	},
