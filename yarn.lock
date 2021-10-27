@@ -1589,10 +1589,9 @@
     web3 "^0.20.7"
     web3-provider-engine "^16.0.3"
 
-"@metamask/controllers@^17.0.0":
+"@metamask/controllers@git+https://github.com/jshuo/controllers.git#v17.0.0":
   version "17.0.0"
-  resolved "https://registry.yarnpkg.com/@metamask/controllers/-/controllers-17.0.0.tgz#7ef00b4f7583d8075115e8a2f074d7b66646bbe8"
-  integrity sha512-myPlAk8SpNm5SwHHKGgm2XDLP4bxNR2UsKoQlYtV7bJq3l8FV1agSFwHBwDhg61/52Xvqdqy+1YDVdV3kOwPgg==
+  resolved "git+https://github.com/jshuo/controllers.git#8134da08a03fb63b146f8a3cffcb5e78fb70d58b"
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
