@@ -27,7 +27,7 @@ build/
 app/bin
 .idea
 .gradle
-local.properties
+
 *.iml
 android/.project
 android/app/.project
@@ -65,9 +65,8 @@ coverage
 /app/core/InpageBridgeWeb3.js
 
 # environment variables
-.js.env
+
 .ios.env
-.android.env
 
 # Sentry
 /sentry.debug.properties
