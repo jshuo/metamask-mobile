@@ -15,6 +15,7 @@ import ManualBackupStep1 from '../../Views/ManualBackupStep1';
 import ManualBackupStep2 from '../../Views/ManualBackupStep2';
 import ManualBackupStep3 from '../../Views/ManualBackupStep3';
 import ImportFromSeed from '../../Views/ImportFromSeed';
+import ScanConnectSecux from '../../Views/ScanConnectSecuX';
 import SyncWithExtensionSuccess from '../../Views/SyncWithExtensionSuccess';
 import Entry from '../../Views/Entry';
 import LockScreen from '../../Views/LockScreen';
@@ -22,6 +23,7 @@ import Main from '../Main';
 import DrawerView from '../../UI/DrawerView';
 import OptinMetrics from '../../UI/OptinMetrics';
 import SimpleWebview from '../../Views/SimpleWebview';
+
 import SharedDeeplinkManager from '../../../core/DeeplinkManager';
 import Engine from '../../../core/Engine';
 import { BranchSubscriber } from 'react-native-branch';
@@ -71,6 +73,11 @@ const OnboardingNav = () => (
 			options={ManualBackupStep3.navigationOptions}
 		/>
 		<Stack.Screen name="ImportFromSeed" component={ImportFromSeed} options={ImportFromSeed.navigationOptions} />
+		<Stack.Screen
+			name="ScanConnectSecux"
+			component={ScanConnectSecux}
+			options={ScanConnectSecux.navigationOptions}
+		/>
 		<Stack.Screen name="OptinMetrics" component={OptinMetrics} options={OptinMetrics.navigationOptions} />
 	</Stack.Navigator>
 );
