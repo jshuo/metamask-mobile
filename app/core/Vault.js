@@ -20,6 +20,14 @@ export const getSeedPhrase = async (password = '') => {
  */
 export const recreateVaultWithSamePassword = async (password = '', selectedAddress) => {
 	const { KeyringController, PreferencesController, AccountTrackerController } = Engine.context;
+	console.log(KeyringController.state.keyrings[0].type);
+	if (KeyringController.state.keyrings[0].type !== 'Secux Hardware') {
+		const seedPhrase = await getSeedPhrase(password);
+		// Recreate keyring with password given to this method
+		await KeyringController.createNewVaultAndRestore(password, seedPhrase);
+	} else {
+		await KeyringController.useSecuXHardwareWallet(password);
+	}
 	const seedPhrase = await getSeedPhrase(password);
 	const oldPrefs = PreferencesController.state;
 	const oldAccounts = AccountTrackerController.accounts;
