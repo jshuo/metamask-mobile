@@ -336,6 +336,22 @@ class Onboarding extends PureComponent {
 		this.handleExistingUser(action);
 	};
 
+	onPressScanConnectSecux = () => {
+		// const action = () => {
+		// 	this.props.navigation.push('ChoosePassword');
+		// 	this.track(ANALYTICS_EVENT_OPTS.ONBOARDING_SELECTED_IMPORT_WALLET);
+		// };
+		// this.handleExistingUser(action);
+
+		const action = () => {
+			this.props.navigation.navigate('ScanConnectSecux', {
+				[PREVIOUS_SCREEN]: ONBOARDING
+			});
+			this.track(ANALYTICS_EVENT_OPTS.ONBOARDING_SELECTED_CREATE_NEW_PASSWORD);
+		};
+		this.handleExistingUser(action);
+	};
+
 	track = (...eventArgs) => {
 		InteractionManager.runAfterInteractions(async () => {
 			if (Analytics.getEnabled()) {
@@ -398,6 +414,16 @@ class Onboarding extends PureComponent {
 							testID={'onboarding-import-button'}
 						>
 							{strings('import_wallet.sync_from_browser_extension_button')}
+						</StyledButton>
+					</View>
+					<View style={styles.buttonWrapper}>
+						<StyledButton
+							style={styles.button}
+							type={'blue'}
+							onPress={this.onPressScanConnectSecux}
+							testID={'scan-connect-secux-button'}
+						>
+							{'Cnnect to SecuX W20/V20'}
 						</StyledButton>
 					</View>
 					<View style={styles.buttonWrapper}>
