@@ -1589,13 +1589,13 @@
     web3 "^0.20.7"
     web3-provider-engine "^16.0.3"
 
-"@metamask/controllers@git+https://github.com/jshuo/controllers.git#v17.0.0":
+"@metamask/controllers@git+https://github.com/jshuo/controllers.git#secux":
   version "17.0.0"
-  resolved "git+https://github.com/jshuo/controllers.git#8134da08a03fb63b146f8a3cffcb5e78fb70d58b"
+  resolved "git+https://github.com/jshuo/controllers.git#214d7713b71c0ee7e3747afccd0fde88d6664324"
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
-    "@metamask/contract-metadata" "^1.29.0"
+    "@metamask/contract-metadata" "^1.30.0"
     "@types/uuid" "^8.3.0"
     abort-controller "^3.0.0"
     async-mutex "^0.2.6"

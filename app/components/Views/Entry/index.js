@@ -14,7 +14,7 @@ import Device from '../../../util/device';
 import { recreateVaultWithSamePassword } from '../../../core/Vault';
 import {
 	EXISTING_USER,
-	ONBOARDING_WIZARD,
+	ONBOARDING_WIZARD, 
 	ENCRYPTION_LIB,
 	ORIGINAL,
 	CURRENT_APP_VERSION,
@@ -125,7 +125,7 @@ const Entry = (props) => {
 				}
 				animateAndGoTo('HomeNav');
 			} else if (props.passwordSet) {
-				animateAndGoTo('Login');
+				props.navigation.navigate('HomeNav');
 			} else {
 				await KeyringController.submitPassword('');
 				await SecureKeychain.resetGenericPassword();
