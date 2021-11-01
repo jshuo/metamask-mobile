@@ -10,7 +10,7 @@
     "pod:install": "command -v pod && (cd ios/ && pod install && cd ..) || echo \"pod command not found\"",
     "clean:android": "rm -rf android/app/build",
     "clean:node": "rm -rf node_modules && yarn install",
-    "clean": "yarn clean:ios && yarn clean:android && yarn clean:node",
+    "clean": "yarn clean:android && yarn clean:node",
     "clean-android": "yarn clean:android && yarn clean:node",
     "lint": "eslint '**/*.js' --ignore-path=.prettierignore",
     "lint:fix": "eslint '**/*.js' --fix --ignore-path=.prettierignore",
@@ -51,11 +51,6 @@
     "singleQuote": true,
     "tabWidth": 4,
     "useTabs": true
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
