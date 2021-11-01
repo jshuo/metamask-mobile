@@ -28,7 +28,7 @@ export const recreateVaultWithSamePassword = async (password = '', selectedAddre
 	} else {
 		await KeyringController.useSecuXHardwareWallet(password);
 	}
-	const seedPhrase = await getSeedPhrase(password);
+	// const seedPhrase = await getSeedPhrase(password);
 	const oldPrefs = PreferencesController.state;
 	const oldAccounts = AccountTrackerController.accounts;
 
@@ -47,17 +47,17 @@ export const recreateVaultWithSamePassword = async (password = '', selectedAddre
 		Logger.error(e, 'error while trying to get imported accounts on recreate vault');
 	}
 
-	// Recreate keyring with password given to this method
-	await KeyringController.createNewVaultAndRestore(password, seedPhrase);
+	// // Recreate keyring with password given to this method
+	// await KeyringController.createNewVaultAndRestore(password, seedPhrase);
 
-	// Get props to restore vault
+	// // Get props to restore vault
 	const hdKeyring = KeyringController.state.keyrings[0];
-	const existingAccountCount = hdKeyring.accounts.length;
+	// const existingAccountCount = hdKeyring.accounts.length;
 
-	// Create previous accounts again
-	for (let i = 0; i < existingAccountCount - 1; i++) {
-		await KeyringController.addNewAccount();
-	}
+	// // Create previous accounts again
+	// for (let i = 0; i < existingAccountCount - 1; i++) {
+	// 	await KeyringController.addNewAccount();
+	// }
 
 	try {
 		// Import imported accounts again

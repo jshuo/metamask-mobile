@@ -686,7 +686,7 @@ const Main = (props) => {
 					onPress={skipAccountModalSkip}
 					toggleSkipCheckbox={toggleSkipCheckbox}
 				/>
-				<ProtectYourWalletModal navigation={props.navigation} />
+				{/* <ProtectYourWalletModal navigation={props.navigation} /> */}
 			</View>
 			{renderSigningModal()}
 			{renderWalletConnectSessionRequestModal()}

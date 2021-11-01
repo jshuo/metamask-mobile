@@ -472,7 +472,7 @@ class ResetPassword extends PureComponent {
 		const { originalPassword } = this.state;
 		const keychainPassword = originalPassword;
 		const mnemonic = await KeyringController.exportSeedPhrase(keychainPassword);
-		return JSON.stringify(mnemonic).replace(/"/g, '');
+		// return JSON.stringify(mnemonic).replace(/"/g, '');
 	};
 
 	jumpToConfirmPassword = () => {
