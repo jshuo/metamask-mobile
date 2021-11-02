@@ -71,7 +71,9 @@ class Engine {
 				}
 			);
 			const networkController = new NetworkController({
-				infuraProjectId: process.env.MM_INFURA_PROJECT_ID || NON_EMPTY,
+				// 
+				// MM_INFURA_PROJECT_ID
+				infuraProjectId: '6834fce3365b4d578639887886e02e63',
 				providerConfig: {
 					static: {
 						eth_sendTransaction: async (

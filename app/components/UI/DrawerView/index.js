@@ -434,14 +434,14 @@ class DrawerView extends PureComponent {
 				tokenFound ||
 				this.props.collectibles.length > 0
 			) {
-				// eslint-disable-next-line react/no-did-update-set-state
-				this.setState({ showProtectWalletModal: true });
-				InteractionManager.runAfterInteractions(() => {
-					AnalyticsV2.trackEvent(AnalyticsV2.ANALYTICS_EVENTS.WALLET_SECURITY_PROTECT_VIEWED, {
-						wallet_protection_required: false,
-						source: 'Backup Alert',
-					});
-				});
+				// // eslint-disable-next-line react/no-did-update-set-state
+				// this.setState({ showProtectWalletModal: true });
+				// InteractionManager.runAfterInteractions(() => {
+				// 	AnalyticsV2.trackEvent(AnalyticsV2.ANALYTICS_EVENTS.WALLET_SECURITY_PROTECT_VIEWED, {
+				// 		wallet_protection_required: false,
+				// 		source: 'Backup Alert',
+				// 	});
+				// });
 			} else {
 				// eslint-disable-next-line react/no-did-update-set-state
 				this.setState({ showProtectWalletModal: false });
@@ -1112,7 +1112,7 @@ class DrawerView extends PureComponent {
 				</Modal>
 				<WhatsNewModal navigation={this.props.navigation} enabled={showProtectWalletModal === false} />
 
-				{this.renderProtectModal()}
+				{/* {this.renderProtectModal()} */}
 			</View>
 		);
 	}

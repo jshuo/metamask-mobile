@@ -127,13 +127,13 @@ class BackupAlert extends PureComponent {
 	};
 
 	goToBackupFlow = () => {
-		this.props.navigation.navigate('SetPasswordFlow', { screen: 'AccountBackupStep1' });
-		InteractionManager.runAfterInteractions(() => {
-			AnalyticsV2.trackEvent(AnalyticsV2.ANALYTICS_EVENTS.WALLET_SECURITY_PROTECT_ENGAGED, {
-				wallet_protection_required: false,
-				source: 'Backup Alert',
-			});
-		});
+		// this.props.navigation.navigate('SetPasswordFlow', { screen: 'AccountBackupStep1' });
+		// InteractionManager.runAfterInteractions(() => {
+		// 	AnalyticsV2.trackEvent(AnalyticsV2.ANALYTICS_EVENTS.WALLET_SECURITY_PROTECT_ENGAGED, {
+		// 		wallet_protection_required: false,
+		// 		source: 'Backup Alert',
+		// 	});
+		// });
 	};
 
 	onDismiss = () => {

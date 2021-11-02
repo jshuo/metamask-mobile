@@ -129,29 +129,7 @@ class ProtectYourWalletModal extends PureComponent {
 				verticalButtons
 			>
 				<View style={styles.wrapper} testID={'protect-wallet-modal'}>
-					<View style={styles.titleWrapper}>
-						<View style={styles.auxCenter} />
-						<Text style={styles.title}>{strings('protect_wallet_modal.title')}</Text>
-						<TouchableOpacity
-							onPress={this.onDismiss}
-							style={styles.closeIcon}
-							hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
-						>
-							<Icon name="times" style={styles.modalXIcon} />
-						</TouchableOpacity>
-					</View>
-					<View style={styles.imageWrapper}>
-						<Image source={protectWalletImage} style={styles.image} />
-					</View>
 
-					<Text style={styles.text}>
-						{strings('protect_wallet_modal.text')}
-						<Text style={{ ...fontStyles.bold }}>{' ' + strings('protect_wallet_modal.text_bold')}</Text>
-					</Text>
-
-					<TouchableOpacity onPress={this.onLearnMore}>
-						<Text style={styles.learnMoreText}>{strings('protect_wallet_modal.action')}</Text>
-					</TouchableOpacity>
 				</View>
 			</ActionModal>
 		);
