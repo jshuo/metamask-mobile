@@ -436,31 +436,7 @@ class ScanConnectSecux extends PureComponent {
 									</TouchableOpacity>
 								</View>
 							</View>
-							<OutlinedTextField
-								style={styles.input}
-								containerStyle={inputWidth}
-								ref={this.passwordInput}
-								placeholder={strings('import_from_seed.new_password')}
-								testID={'input-password-field'}
-								returnKeyType={'next'}
-								autoCapitalize="none"
-								secureTextEntry={secureTextEntry}
-								onChangeText={this.onPasswordChange}
-								value='secux4296'
-								baseColor={colors.grey500}
-								tintColor={colors.blue}
-								onSubmitEditing={this.jumpToConfirmPassword}
-							/>
 
-							{(password !== '' && (
-								<Text style={styles.passwordStrengthLabel}>
-									{strings('choose_password.password_strength')}
-									<Text style={styles[`strength_${passwordStrengthWord}`]}>
-										{' '}
-										{strings(`choose_password.strength_${passwordStrengthWord}`)}
-									</Text>
-								</Text>
-							)) || <Text style={styles.passwordStrengthLabel} />}
 						</View>
 
 						<View style={styles.field}>
@@ -481,30 +457,16 @@ class ScanConnectSecux extends PureComponent {
 								onSubmitEditing={this.onPressImport}
 							/>
 
-							<View style={styles.showMatchingPasswords}>
-								{password !== '' && password === confirmPassword ? (
-									<Icon name="check" size={12} color={colors.green300} />
-								) : null}
-							</View>
-							<Text style={styles.passwordStrengthLabel}>
-								{strings('choose_password.must_be_at_least', { number: MIN_PASSWORD_LENGTH })}
-							</Text>
 						</View>
 
 						{this.renderSwitch()}
 
-						{!!error && (
-							<Text style={styles.errorMsg} testID={'invalid-seed-phrase'}>
-								{error}
-							</Text>
-						)}
 
 						<View style={styles.ctaWrapper}>
 							<StyledButton
 								type={'blue'}
 								onPress={this.onPressImport}
 								testID={'submit'}
-								disabled={!(password !== '' && password === confirmPassword)}
 							>
 								{loading ? (
 									<ActivityIndicator size="small" color="white" />

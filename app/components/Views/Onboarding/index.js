@@ -347,7 +347,6 @@ class Onboarding extends PureComponent {
 			this.props.navigation.navigate('ScanConnectSecux', {
 				[PREVIOUS_SCREEN]: ONBOARDING
 			});
-			this.track(ANALYTICS_EVENT_OPTS.ONBOARDING_SELECTED_CREATE_NEW_PASSWORD);
 		};
 		this.handleExistingUser(action);
 	};
