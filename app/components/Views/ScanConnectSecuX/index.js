@@ -7,7 +7,7 @@ import {
 	TouchableOpacity,
 	Text,
 	View,
-	TextInput,
+	PermissionsAndroid,
 	SafeAreaView,
 	StyleSheet
 } from 'react-native';
@@ -42,6 +42,8 @@ import {
 import Logger from '../../../util/Logger';
 import { getPasswordStrengthWord, passwordRequirementsMet, MIN_PASSWORD_LENGTH } from '../../../util/password';
 import importAdditionalAccounts from '../../../util/importAdditionalAccounts';
+import TransportBLE from '../../../../secuX_Connect/dist/lib/connect/devices/BleTransport'
+// import SecuxConnect, { TRANSPORT } from '../../../../secuX_Connect/dist/native'r
 
 const styles = StyleSheet.create({
 	mainWrapper: {
@@ -223,20 +225,69 @@ class ScanConnectSecux extends PureComponent {
 	passwordInput = React.createRef();
 	confirmPasswordInput = React.createRef();
 
-	async componentDidMount() {
-		const biometryType = await SecureKeychain.getSupportedBiometryType();
-		if (biometryType) {
-			let enabled = true;
-			const previouslyDisabled = await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
-			if (previouslyDisabled && previouslyDisabled === TRUE) {
-				enabled = false;
+	startScan = () => {
+		this.setState({ refreshing: true })
+	
+		this._subscriptions = this._transportLib.listen({
+		  complete: () => {
+			Logger.debug('listen: subscription completed')
+			this.setState({ refreshing: false })
+		  },
+		  next: (e) => {
+			if (e.type === 'add') {
+			  Logger.debug('listen: new device detected')
+	
+			  // with bluetooth, new devices are appended in the screen
+			  this.setState(deviceAddition(e.descriptor))
+	
 			}
-			this.setState({ biometryType: Device.isAndroid() ? 'biometrics' : biometryType, biometryChoice: enabled });
+		  },
+		  error: (error) => {
+			this.setState({ error, refreshing: false, devices: [] })
+		  },
+		})
+	  }
+
+	async componentDidMount() {
+		this._transportLib = TransportBLE
+		this._isMounted = true
+		if (Platform.OS === 'android') {
+		  await PermissionsAndroid.request(
+			PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+		  )
 		}
-		// Workaround https://github.com/facebook/react-native/issues/9958
-		setTimeout(() => {
-			this.setState({ inputWidth: { width: '100%' } });
-		}, 100);
+		// check if bluetooth is available
+		// no need to save a reference to this subscription's unsubscribe func
+		// as it's just an empty method. Rather, we make sure sate is only
+		// modified when component is mounted
+		let previousAvailable = false
+		TransportBLE.observeState({
+		  next: (e) => {
+			if (this._isMounted) {
+			  Logger.debug('BLE observeState event', e)
+			  if (this._bluetoothEnabled == null && !e.available) {
+				this.setState({
+				  error: new BluetoothDisabledError(),
+				  refreshing: false,
+				})
+			  }
+			  if (e.available !== previousAvailable) {
+				previousAvailable = e.available
+				this._bluetoothEnabled = e.available
+				if (e.available) {
+				  this.reload()
+				} else {
+				  this.setState({
+					error: new BluetoothDisabledError(),
+					refreshing: false,
+					devices: [],
+				  })
+				}
+			  }
+			}
+		  },
+		})
+		this.startScan()
 	}
 
 	onPressImport = async () => {
@@ -251,34 +302,28 @@ class ScanConnectSecux extends PureComponent {
 				await KeyringController.useSecuXHardwareWallet(password);
 
 
-				if (this.state.biometryType && this.state.biometryChoice) {
-					await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.BIOMETRICS);
-				} else if (this.state.rememberMe) {
-					await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.REMEMBER_ME);
-				} else {
-					await SecureKeychain.resetGenericPassword();
-				}
+				// if (this.state.biometryType && this.state.biometryChoice) {
+				// 	await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.BIOMETRICS);
+				// } else if (this.state.rememberMe) {
+				// 	await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.REMEMBER_ME);
+				// } else {
+				// 	await SecureKeychain.resetGenericPassword();
+				// }
 				// Get onboarding wizard state
 				const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
 				// Check if user passed through metrics opt-in screen
-				const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
+				// const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
 				// mark the user as existing so it doesn't see the create password screen again
 				await AsyncStorage.setItem(EXISTING_USER, TRUE);
 				console.log ("ScanConnectSecux Setting Existing User")
-				await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
+				// await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
 				this.setState({ loading: false });
-				if (!metricsOptIn) {
-					this.props.navigation.navigate('OptinMetrics');
-					console.log ("this.props.navigation.navigate('OptinMetrics')")
-				} else if (onboardingWizard) {
-					this.props.navigation.navigate('HomeNav');
-					console.log ("this.props.navigation.navigate('HomeNav'")
-				} else {
+
 					console.log ("ScanConnectSecux: setOnboardingWizardStep(1)")
 					this.props.setOnboardingWizardStep(1);
 					this.props.navigation.navigate('HomeNav', { screen: 'WalletView' });
 					console.log ("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
-				}
+
 				console.log ("ScanConnectSecux: importAdditionalAccounts")
 				await importAdditionalAccounts();
 			} catch (error) {
@@ -296,101 +341,6 @@ class ScanConnectSecux extends PureComponent {
 			}
 	};
 
-	onBiometryChoiceChange = value => {
-		this.setState({ biometryChoice: value });
-	};
-
-
-	onPasswordChange = val => {
-		const passInfo = zxcvbn(val);
-
-		this.setState({ password: val, passwordStrength: passInfo.score });
-	};
-
-	onPasswordConfirmChange = val => {
-		this.setState({ confirmPassword: val });
-	};
-
-	jumpToPassword = () => {
-		const { current } = this.passwordInput;
-		current && current.focus();
-	};
-
-	jumpToConfirmPassword = () => {
-		const { current } = this.confirmPasswordInput;
-		current && current.focus();
-	};
-
-	updateBiometryChoice = async biometryChoice => {
-		if (!biometryChoice) {
-			await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, TRUE);
-		} else {
-			await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
-		}
-		this.setState({ biometryChoice });
-	};
-
-	renderSwitch = () => {
-		if (this.state.biometryType) {
-			return (
-				<View style={styles.biometrics}>
-					<Text style={styles.biometryLabel}>
-						{strings(`biometrics.enable_${this.state.biometryType.toLowerCase()}`)}
-					</Text>
-					<Switch
-						onValueChange={this.updateBiometryChoice}
-						value={this.state.biometryChoice}
-						style={styles.biometrySwitch}
-						trackColor={Device.isIos() ? { true: colors.green300, false: colors.grey300 } : null}
-						ios_backgroundColor={colors.grey300}
-					/>
-				</View>
-			);
-		}
-
-		return (
-			<View style={styles.biometrics}>
-				<Text style={styles.biometryLabel}>{strings(`choose_password.remember_me`)}</Text>
-				<Switch
-					onValueChange={rememberMe => this.setState({ rememberMe })} // eslint-disable-line react/jsx-no-bind
-					value={this.state.rememberMe}
-					style={styles.biometrySwitch}
-					trackColor={Device.isIos() ? { true: colors.green300, false: colors.grey300 } : null}
-					ios_backgroundColor={colors.grey300}
-				/>
-			</View>
-		);
-	};
-
-	toggleShowHide = () => {
-		this.setState({ secureTextEntry: !this.state.secureTextEntry });
-	};
-
-	toggleHideSeedPhraseInput = () => {
-		this.setState(({ hideSeedPhraseInput }) => ({ hideSeedPhraseInput: !hideSeedPhraseInput }));
-	};
-
-	onQrCodePress = () => {
-		setTimeout(this.toggleHideSeedPhraseInput, 100);
-		this.props.navigation.navigate('QRScanner', {
-			onScanSuccess: ({ seed = undefined }) => {
-				if (seed) {
-					this.setState({ seed });
-				} else {
-					Alert.alert(
-						strings('import_from_seed.invalid_qr_code_title'),
-						strings('import_from_seed.invalid_qr_code_message')
-					);
-				}
-				this.toggleHideSeedPhraseInput();
-			},
-			onScanError: error => {
-				this.toggleHideSeedPhraseInput();
-			}
-		});
-	};
-
-	seedphraseInputFocused = () => this.setState({ seedphraseInputFocused: !this.state.seedphraseInputFocused });
 
 	render() {
 		const {
@@ -404,63 +354,12 @@ class ScanConnectSecux extends PureComponent {
 			hideSeedPhraseInput
 		} = this.state;
 
-		const passwordStrengthWord = getPasswordStrengthWord(passwordStrength);
 
 		return (
 			<SafeAreaView style={styles.mainWrapper}>
 				<KeyboardAwareScrollView style={styles.wrapper} resetScrollToCoords={{ x: 0, y: 0 }}>
 					<View testID={'import-from-seed-screen'}>
 						<Text style={styles.title}>{'Scan Connect Secux'}</Text>
-						<View style={styles.fieldRow}>
-							<View style={styles.fieldCol}>
-								<Text style={styles.label}>{strings('choose_password.seed_phrase')}</Text>
-							</View>
-							<View style={[styles.fieldCol, styles.fieldColRight]}>
-								<TouchableOpacity onPress={this.toggleHideSeedPhraseInput}>
-									<Text style={styles.label}>
-										{strings(`choose_password.${hideSeedPhraseInput ? 'show' : 'hide'}`)}
-									</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-						<View style={styles.field}>
-							<View style={styles.fieldRow}>
-								<View style={styles.fieldCol}>
-									<Text style={styles.label}>{strings('import_from_seed.new_password')}</Text>
-								</View>
-								<View style={[styles.fieldCol, styles.fieldColRight]}>
-									<TouchableOpacity onPress={this.toggleShowHide}>
-										<Text style={styles.label}>
-											{strings(`choose_password.${secureTextEntry ? 'show' : 'hide'}`)}
-										</Text>
-									</TouchableOpacity>
-								</View>
-							</View>
-
-						</View>
-
-						<View style={styles.field}>
-							<Text style={styles.label}>{strings('import_from_seed.confirm_password')}</Text>
-							<OutlinedTextField
-								style={styles.input}
-								containerStyle={inputWidth}
-								ref={this.confirmPasswordInput}
-								testID={'input-password-field-confirm'}
-								onChangeText={this.onPasswordConfirmChange}
-								returnKeyType={'next'}
-								autoCapitalize="none"
-								secureTextEntry={secureTextEntry}
-								placeholder={strings('import_from_seed.confirm_password')}
-								value='secux4296'
-								baseColor={colors.grey500}
-								tintColor={colors.blue}
-								onSubmitEditing={this.onPressImport}
-							/>
-
-						</View>
-
-						{this.renderSwitch()}
-
 
 						<View style={styles.ctaWrapper}>
 							<StyledButton
@@ -477,12 +376,7 @@ class ScanConnectSecux extends PureComponent {
 						</View>
 					</View>
 				</KeyboardAwareScrollView>
-				<View style={styles.termsAndConditions}>
-					<TermsAndConditions
-						navigation={this.props.navigation}
-						action={strings('import_from_seed.import_button')}
-					/>
-				</View>
+
 			</SafeAreaView>
 		);
 	}

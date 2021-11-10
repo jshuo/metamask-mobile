@@ -5,5 +5,6 @@
 # For customization when using a Version Control System, please read the
 # header note.
 #Sun Jul 11 16:03:58 CST 2021
-sdk.dir=/home/secux/Library/Android/sdk
-ndk.dir=/home/secux/Library/Android/sdk/ndk/17.2.4988734
+sdk.dir=/home/secux/Android/Sdk
+ndk.dir=/home/secux/Android/Sdk/ndk/17.2.4988734
+

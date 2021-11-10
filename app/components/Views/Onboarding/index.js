@@ -343,12 +343,11 @@ class Onboarding extends PureComponent {
 		// };
 		// this.handleExistingUser(action);
 
-		const action = () => {
+
 			this.props.navigation.navigate('ScanConnectSecux', {
 				[PREVIOUS_SCREEN]: ONBOARDING
 			});
-		};
-		this.handleExistingUser(action);
+
 	};
 
 	track = (...eventArgs) => {
