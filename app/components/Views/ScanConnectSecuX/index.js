@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
-	Switch,
+	FlatList,
 	ActivityIndicator,
 	Alert,
 	TouchableOpacity,
@@ -9,7 +9,8 @@ import {
 	View,
 	PermissionsAndroid,
 	SafeAreaView,
-	StyleSheet
+	StyleSheet,
+	RefreshControl
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -24,12 +25,8 @@ import { strings } from '../../../../locales/i18n';
 import SecureKeychain from '../../../core/SecureKeychain';
 import AppConstants from '../../../core/AppConstants';
 import setOnboardingWizardStep from '../../../actions/wizard';
-import TermsAndConditions from '../TermsAndConditions';
-import zxcvbn from 'zxcvbn';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import DeviceItem from './DeviceItem'
 import Device from '../../../util/device';
-import { failedSeedPhraseRequirements, isValidMnemonic, parseSeedPhrase } from '../../../util/validators';
-import { OutlinedTextField } from 'react-native-material-textfield';
 import {
 	SEED_PHRASE_HINTS,
 	BIOMETRY_CHOICE_DISABLED,
@@ -43,7 +40,7 @@ import Logger from '../../../util/Logger';
 import { getPasswordStrengthWord, passwordRequirementsMet, MIN_PASSWORD_LENGTH } from '../../../util/password';
 import importAdditionalAccounts from '../../../util/importAdditionalAccounts';
 import TransportBLE from '../../../../secuX_Connect/dist/lib/connect/devices/BleTransport'
-// import SecuxConnect, { TRANSPORT } from '../../../../secuX_Connect/dist/native'r
+import SecuxConnect, { TRANSPORT } from '../../../../secuX_Connect/dist/native'
 
 const styles = StyleSheet.create({
 	mainWrapper: {
@@ -92,74 +89,8 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		...fontStyles.normal
 	},
-	seedPhrase: {
-		marginBottom: 10,
-		paddingTop: 20,
-		paddingBottom: 20,
-		paddingHorizontal: 20,
-		fontSize: 20,
-		borderRadius: 10,
-		minHeight: 110,
-		height: 'auto',
-		borderWidth: 1,
-		borderColor: colors.grey500,
-		backgroundColor: colors.white,
-		...fontStyles.normal
-	},
 	padding: {
 		paddingRight: 46
-	},
-	biometrics: {
-		alignItems: 'flex-start',
-		marginTop: 10
-	},
-	biometryLabel: {
-		flex: 1,
-		fontSize: 16,
-		color: colors.black,
-		...fontStyles.normal
-	},
-	biometrySwitch: {
-		marginTop: 10,
-		flex: 0
-	},
-	termsAndConditions: {
-		paddingVertical: 10
-	},
-	passwordStrengthLabel: {
-		height: 20,
-		fontSize: 15,
-		color: colors.black,
-		...fontStyles.normal
-	},
-	// eslint-disable-next-line react-native/no-unused-styles
-	strength_weak: {
-		color: colors.red
-	},
-	// eslint-disable-next-line react-native/no-unused-styles
-	strength_good: {
-		color: colors.blue
-	},
-	// eslint-disable-next-line react-native/no-unused-styles
-	strength_strong: {
-		color: colors.green300
-	},
-	showMatchingPasswords: {
-		position: 'absolute',
-		top: 52,
-		right: 17,
-		alignSelf: 'flex-end'
-	},
-	qrCode: {
-		marginRight: 10,
-		borderWidth: 1,
-		borderRadius: 6,
-		borderColor: colors.grey100,
-		paddingVertical: 4,
-		paddingHorizontal: 6,
-		marginTop: -50,
-		marginBottom: 30,
-		alignSelf: 'flex-end'
 	},
 	inputFocused: {
 		borderColor: colors.blue,
@@ -173,6 +104,22 @@ const styles = StyleSheet.create({
 });
 
 const PASSCODE_NOT_SET_ERROR = 'Error: Passcode not set.';
+
+const strToBuffer = (str) => {
+	const bufArray = [];
+	for (let i = 0; i < str.length; i += 1) {
+	  bufArray[i] = str.charCodeAt(i);
+	}
+	return Buffer.from(bufArray);
+  };
+
+const deviceAddition = (device) => ({ devices }) => {
+	return {
+	  devices: devices.some((i) => i.id === device.id)
+		? devices
+		: devices.concat(device),
+	}
+  }
 
 /**
  * View where users can set restore their account
@@ -209,33 +156,33 @@ class ScanConnectSecux extends PureComponent {
 
 	state = {
 		password: '',
-		confirmPassword: '',
-		seed: '',
-		biometryType: null,
-		rememberMe: false,
-		secureTextEntry: true,
-		biometryChoice: false,
 		loading: false,
 		error: null,
-		seedphraseInputFocused: false,
-		inputWidth: { width: '99%' },
-		hideSeedPhraseInput: true
+		devices: this.props.defaultDevices ? this.props.defaultDevices : [],
+		deviceId: null,
+		error: null,
+		refreshing: false,
+		waiting: false,
 	};
 
-	passwordInput = React.createRef();
-	confirmPasswordInput = React.createRef();
+	_subscriptions: ?{ unsubscribe: () => any } = null
+	_bluetoothEnabled: ?boolean = null
+	_transportLib: Object = null
+	_isMounted: boolean = false
+
+	
 
 	startScan = () => {
 		this.setState({ refreshing: true })
 	
 		this._subscriptions = this._transportLib.listen({
 		  complete: () => {
-			Logger.debug('listen: subscription completed')
+			Logger.log('listen: subscription completed')
 			this.setState({ refreshing: false })
 		  },
 		  next: (e) => {
 			if (e.type === 'add') {
-			  Logger.debug('listen: new device detected')
+			  Logger.log('listen: new device detected')
 	
 			  // with bluetooth, new devices are appended in the screen
 			  this.setState(deviceAddition(e.descriptor))
@@ -247,6 +194,94 @@ class ScanConnectSecux extends PureComponent {
 		  },
 		})
 	  }
+
+	  _unsubscribe: () => void = () => {
+		if (this._subscriptions != null) {
+		  this._subscriptions.unsubscribe()
+		  this._subscriptions = null
+		}
+	  }
+	  _setStateSafe: (InexactSubset<State>) => void = (newState) => {
+    if (this._isMounted) this.setState(newState)
+  }
+	  reload = () => {
+		this._unsubscribe()
+		this._setStateSafe({
+		  devices: this.props.defaultDevices ? this.props.defaultDevices : [],
+		  deviceId: null,
+		  error: null,
+		  refreshing: false,
+		})
+		this.startScan()
+	  }
+	
+	  _onSelectDevice = async (device) => {
+		if (this.state.deviceId != null) return
+		this._unsubscribe()
+		const { onConnectBLE } = this.props
+		try {
+		  if (device.id == null) {
+			// should never happen
+			throw new Error('device id is null')
+		  }
+		  this.secuxConnect = await SecuxConnect.connectDevice(TRANSPORT.REACT_NATIVE_BLE, { deviceId: device.id.toString() })
+		  this.setState({
+			deviceId: device.id.toString(),
+			refreshing: false,
+			waiting: true,
+		  })
+		  await this.secuxConnect.send(strToBuffer("42960705"));
+		  this.props.onConnectBLE(true)
+		  this.setState({ refreshing: false })
+
+		} catch (e) {
+		  Logger.log(e)
+		  if (e instanceof RejectedByUserError) {
+			this.reload()
+			return
+		  }
+		  this._setStateSafe({ error: e })
+		} finally {
+		  this._setStateSafe({ waiting: false })
+		}
+	  }
+	
+	  renderItem = ({item}: {item: Device}) => (
+		<DeviceItem device={item} onSelect={() => this._onSelectDevice(item)} />
+	  )
+	
+	  ListHeader = () => {
+		const { error, waiting } = this.state
+		const { intl, onWaitingMessage } = this.props
+	
+		const ListHeaderWrapper = ({ msg, err }: { msg: string, err: ?string }) => (
+		  <View style={styles.listHeader}>
+			<Text style={[styles.paragraph, styles.paragraphText]}>{msg}</Text>
+			{err != null && (
+			  <Text style={[styles.error, styles.paragraphText]}>{err}</Text>
+			)}
+		  </View>
+		)
+		let msg, errMsg
+		if (error != null) {
+		  msg = intl.formatMessage(messages.error)
+		  if (error instanceof LocalizableError) {
+			errMsg = intl.formatMessage({
+			  id: error.id,
+			  defaultMessage: error.defaultMessage,
+			})
+		  } else {
+			errMsg = String(error.message)
+		  }
+		} else {
+		  if (waiting && typeof onWaitingMessage !== 'undefined') {
+			msg = onWaitingMessage
+		  }
+		}
+		if (msg == null) return null
+		return <ListHeaderWrapper msg={msg} err={errMsg} />
+	  }
+	
 
 	async componentDidMount() {
 		this._transportLib = TransportBLE
@@ -264,7 +299,7 @@ class ScanConnectSecux extends PureComponent {
 		TransportBLE.observeState({
 		  next: (e) => {
 			if (this._isMounted) {
-			  Logger.debug('BLE observeState event', e)
+			  Logger.log('BLE observeState event', e)
 			  if (this._bluetoothEnabled == null && !e.available) {
 				this.setState({
 				  error: new BluetoothDisabledError(),
@@ -293,65 +328,54 @@ class ScanConnectSecux extends PureComponent {
 	onPressImport = async () => {
 		const { loading, seed, password, confirmPassword } = this.state;
 
-			try {
-				this.setState({ loading: true });
+		try {
+			this.setState({ loading: true });
 
-				const { KeyringController } = Engine.context;
-				await Engine.resetState();
-				await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
-				await KeyringController.useSecuXHardwareWallet(password);
+			const { KeyringController } = Engine.context;
+			await Engine.resetState();
+			await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
+			await KeyringController.useSecuXHardwareWallet(this.secuxConnect);
 
+			const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
+			// Check if user passed through metrics opt-in screen
+			// const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
+			// mark the user as existing so it doesn't see the create password screen again
+			await AsyncStorage.setItem(EXISTING_USER, TRUE);
+			console.log("ScanConnectSecux Setting Existing User")
+			// await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
+			this.setState({ loading: false });
 
-				// if (this.state.biometryType && this.state.biometryChoice) {
-				// 	await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.BIOMETRICS);
-				// } else if (this.state.rememberMe) {
-				// 	await SecureKeychain.setGenericPassword(password, SecureKeychain.TYPES.REMEMBER_ME);
-				// } else {
-				// 	await SecureKeychain.resetGenericPassword();
-				// }
-				// Get onboarding wizard state
-				const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
-				// Check if user passed through metrics opt-in screen
-				// const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
-				// mark the user as existing so it doesn't see the create password screen again
-				await AsyncStorage.setItem(EXISTING_USER, TRUE);
-				console.log ("ScanConnectSecux Setting Existing User")
-				// await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
+			console.log("ScanConnectSecux: setOnboardingWizardStep(1)")
+			this.props.setOnboardingWizardStep(1);
+			this.props.navigation.navigate('HomeNav', { screen: 'WalletView' });
+			console.log("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
+
+			console.log("ScanConnectSecux: importAdditionalAccounts")
+			await importAdditionalAccounts();
+		} catch (error) {
+			// Should we force people to enable passcode / biometrics?
+			if (error.toString() === PASSCODE_NOT_SET_ERROR) {
+				Alert.alert(
+					'Security Alert',
+					'In order to proceed, you need to turn Passcode on or any biometrics authentication method supported in your device (FaceID, TouchID or Fingerprint)'
+				);
 				this.setState({ loading: false });
-
-					console.log ("ScanConnectSecux: setOnboardingWizardStep(1)")
-					this.props.setOnboardingWizardStep(1);
-					this.props.navigation.navigate('HomeNav', { screen: 'WalletView' });
-					console.log ("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
-
-				console.log ("ScanConnectSecux: importAdditionalAccounts")
-				await importAdditionalAccounts();
-			} catch (error) {
-				// Should we force people to enable passcode / biometrics?
-				if (error.toString() === PASSCODE_NOT_SET_ERROR) {
-					Alert.alert(
-						'Security Alert',
-						'In order to proceed, you need to turn Passcode on or any biometrics authentication method supported in your device (FaceID, TouchID or Fingerprint)'
-					);
-					this.setState({ loading: false });
-				} else {
-					this.setState({ loading: false, error: error.toString() });
-					Logger.log('Error with seed phrase import', error);
-				}
+			} else {
+				this.setState({ loading: false, error: error.toString() });
+				Logger.log('Error with seed phrase import', error);
 			}
+		}
 	};
 
 
 	render() {
 		const {
-			password,
-			passwordStrength,
-			confirmPassword,
-			inputWidth,
-			secureTextEntry,
-			error,
 			loading,
-			hideSeedPhraseInput
+			error,
+			devices,
+			refreshing,
+			deviceId,
+			waiting,
 		} = this.state;
 
 
@@ -376,6 +400,24 @@ class ScanConnectSecux extends PureComponent {
 						</View>
 					</View>
 				</KeyboardAwareScrollView>
+
+
+				<FlatList
+					extraData={[error, deviceId]}
+					style={styles.flatList}
+					contentContainerStyle={styles.flatListContentContainer}
+					data={devices}
+					renderItem={this.renderItem}
+					ListHeaderComponent={this.ListHeader}
+					keyExtractor={(item) => item.id.toString()}
+					refreshControl={
+						<RefreshControl
+							onRefresh={this.reload}
+							refreshing={refreshing}
+							progressViewOffset={74 /* approx. the size of one elem */}
+						/>
+					}
+				/>
 
 			</SafeAreaView>
 		);
