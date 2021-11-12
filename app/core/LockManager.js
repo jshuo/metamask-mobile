@@ -22,25 +22,25 @@ export default class LockManager {
 			return;
 		}
 
-		if (nextAppState !== 'active') {
-			// Auto-lock immediately
-			if (this.lockTime === 0) {
-				this.lockApp();
-			} else {
-				// Autolock after some time
-				this.lockTimer = BackgroundTimer.setTimeout(() => {
-					if (this.lockTimer) {
-						this.lockApp();
-					}
-				}, this.lockTime);
-			}
-		} else if (this.appState !== 'active' && nextAppState === 'active') {
-			// Prevent locking since it didnt reach the time threshold
-			if (this.lockTimer) {
-				BackgroundTimer.clearTimeout(this.lockTimer);
-				this.lockTimer = null;
-			}
-		}
+		// if (nextAppState !== 'active') {
+		// 	// Auto-lock immediately
+		// 	if (this.lockTime === 0) {
+		// 		this.lockApp();
+		// 	} else {
+		// 		// Autolock after some time
+		// 		this.lockTimer = BackgroundTimer.setTimeout(() => {
+		// 			if (this.lockTimer) {
+		// 				this.lockApp();
+		// 			}
+		// 		}, this.lockTime);
+		// 	}
+		// } else if (this.appState !== 'active' && nextAppState === 'active') {
+		// 	// Prevent locking since it didnt reach the time threshold
+		// 	if (this.lockTimer) {
+		// 		BackgroundTimer.clearTimeout(this.lockTimer);
+		// 		this.lockTimer = null;
+		// 	}
+		// }
 
 		this.appState = nextAppState;
 	};
