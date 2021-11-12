@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'; 
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
 	FlatList,
@@ -230,9 +230,12 @@ class ScanConnectSecux extends PureComponent {
 			refreshing: false,
 			waiting: true,
 		  })
-		  await this.secuxConnect.send(strToBuffer("42960705"));
-		  this.props.onConnectBLE(true)
+		  let otp = '42960705'
+		  console.log(otp)
+		  await this.secuxConnect.send(strToBuffer(otp));
+		//   this.props.onConnectBLE(true)
 		  this.setState({ refreshing: false })
+		  this.onConnectBLE()
 
 		} catch (e) {
 		  Logger.log(e)
@@ -325,7 +328,7 @@ class ScanConnectSecux extends PureComponent {
 		this.startScan()
 	}
 
-	onPressImport = async () => {
+	onConnectBLE = async () => {
 		const { loading, seed, password, confirmPassword } = this.state;
 
 		try {
@@ -334,7 +337,7 @@ class ScanConnectSecux extends PureComponent {
 			const { KeyringController } = Engine.context;
 			await Engine.resetState();
 			await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
-			await KeyringController.useSecuXHardwareWallet(this.secuxConnect);
+			await KeyringController.useSecuXHardwareWallet(this.secuxConnect.device.id);
 
 			const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
 			// Check if user passed through metrics opt-in screen
@@ -382,23 +385,21 @@ class ScanConnectSecux extends PureComponent {
 		return (
 			<SafeAreaView style={styles.mainWrapper}>
 				<KeyboardAwareScrollView style={styles.wrapper} resetScrollToCoords={{ x: 0, y: 0 }}>
-					<View testID={'import-from-seed-screen'}>
+					{/* <View testID={'import-from-seed-screen'}>
 						<Text style={styles.title}>{'Scan Connect Secux'}</Text>
 
 						<View style={styles.ctaWrapper}>
 							<StyledButton
 								type={'blue'}
-								onPress={this.onPressImport}
+								onPress={this.onConnectBLE}
 								testID={'submit'}
 							>
 								{loading ? (
 									<ActivityIndicator size="small" color="white" />
-								) : (
-									strings('import_from_seed.import_button')
-								)}
+								) : ('On Connect BLE ')}
 							</StyledButton>
 						</View>
-					</View>
+					</View> */}
 				</KeyboardAwareScrollView>
 
 
