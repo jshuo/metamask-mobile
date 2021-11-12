@@ -407,31 +407,11 @@ class Onboarding extends PureComponent {
 					<View style={styles.buttonWrapper}>
 						<StyledButton
 							style={styles.button}
-							type={'normal'}
-							onPress={this.onPressSync}
-							testID={'onboarding-import-button'}
-						>
-							{strings('import_wallet.sync_from_browser_extension_button')}
-						</StyledButton>
-					</View>
-					<View style={styles.buttonWrapper}>
-						<StyledButton
-							style={styles.button}
 							type={'blue'}
 							onPress={this.onPressScanConnectSecux}
 							testID={'scan-connect-secux-button'}
 						>
 							{'Cnnect to SecuX W20/V20'}
-						</StyledButton>
-					</View>
-					<View style={styles.buttonWrapper}>
-						<StyledButton
-							style={styles.button}
-							type={'blue'}
-							onPress={this.onPressCreate}
-							testID={'create-wallet-button'}
-						>
-							{strings('onboarding.start_exploring_now')}
 						</StyledButton>
 					</View>
 				</View>
