@@ -126,33 +126,6 @@ const deviceAddition = (device) => ({ devices }) => {
  * using a seed phrase
  */
 class ScanConnectSecux extends PureComponent {
-	static navigationOptions = ({ navigation, route }) => getOnboardingNavbarOptions(navigation, route);
-
-	static propTypes = {
-		/**
-		 * The navigator object
-		 */
-		navigation: PropTypes.object,
-		/**
-		 * The action to update the password set flag
-		 * in the redux store
-		 */
-		passwordSet: PropTypes.func,
-		/**
-		 * The action to set the locktime
-		 * in the redux store
-		 */
-		setLockTime: PropTypes.func,
-		/**
-		 * The action to update the seedphrase backed up flag
-		 * in the redux store
-		 */
-		seedphraseBackedUp: PropTypes.func,
-		/**
-		 * Action to set onboarding wizard step
-		 */
-		setOnboardingWizardStep: PropTypes.func
-	};
 
 	state = {
 		password: '',
@@ -337,9 +310,7 @@ class ScanConnectSecux extends PureComponent {
 			const { KeyringController } = Engine.context;
 			await Engine.resetState();
 			await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
-			await KeyringController.useSecuXHardwareWallet(this.secuxConnect.device.id);
-
-			const onboardingWizard = await AsyncStorage.getItem(ONBOARDING_WIZARD);
+			await KeyringController.useSecuXHardwareWallet(this.secuxConnect.device.id, this.secuxConnect);
 			// Check if user passed through metrics opt-in screen
 			// const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
 			// mark the user as existing so it doesn't see the create password screen again
@@ -347,10 +318,12 @@ class ScanConnectSecux extends PureComponent {
 			console.log("ScanConnectSecux Setting Existing User")
 			// await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
 			this.setState({ loading: false });
-
-			console.log("ScanConnectSecux: setOnboardingWizardStep(1)")
-			this.props.setOnboardingWizardStep(1);
-			this.props.navigation.navigate('HomeNav', { screen: 'WalletView' });
+			
+			this.props.navigation.navigate('HomeNav', {
+				screen: 'WalletView', params: {
+					secuxDeviceHandle: this.secuxConnect
+				}
+			});
 			console.log("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
 
 			console.log("ScanConnectSecux: importAdditionalAccounts")
