@@ -220,7 +220,7 @@ class Onboarding extends PureComponent {
 		this.mounted = true;
 		this.checkIfExistingUser();
 		InteractionManager.runAfterInteractions(() => {
-			PreventScreenshot.forbid();
+			PreventScreenshot.allow();
 			if (this.props.route.params?.delete) {
 				this.props.setLoading(strings('onboarding.delete_current'));
 				setTimeout(() => {
@@ -255,6 +255,7 @@ class Onboarding extends PureComponent {
 			this.props.navigation.navigate('HomeNav');
 		} else {
 			this.props.navigation.navigate('Login');
+			// secux
 		}
 	};
 
