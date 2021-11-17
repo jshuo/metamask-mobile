@@ -574,7 +574,12 @@ class DrawerView extends PureComponent {
 				params: { screen: 'Onboarding' },
 			});
 		} else {
-			this.props.navigation.navigate('Login');
+			// secux hack
+			this.props.navigation.navigate('OnboardingRootNav', {
+				screen: 'OnboardingNav',
+				params: { screen: 'Onboarding' },
+			});
+
 		}
 	};
 

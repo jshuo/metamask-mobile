@@ -10,7 +10,8 @@ import {
     PermissionsAndroid,
     SafeAreaView,
     StyleSheet,
-    RefreshControl
+    RefreshControl,
+    Image
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -41,6 +42,7 @@ import { getPasswordStrengthWord, passwordRequirementsMet, MIN_PASSWORD_LENGTH }
 import importAdditionalAccounts from '../../../util/importAdditionalAccounts';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
+import image from '../../../images/secux_w20.png'
 
 
 const styles = StyleSheet.create({
@@ -161,15 +163,16 @@ class ScanConnectSecux extends PureComponent {
                 waiting: true,
                 transport
             })
-            // let otp = '42960705'
-            // console.log(otp)
-            // await transport.SendOTP(otp);
+            // secux hack
+            let otp = '42960705'
+            console.log(otp)
+            await transport.SendOTP(otp);
 
             // show otp dialog
-            this.setState({ showDialog: true });
+            // this.setState({ showDialog: true });
 
             this.setState({ refreshing: false })
-            // this.onConnectBLE();
+            this.onConnectBLE();
 
         } catch (e) {
             Logger.log(e)
@@ -306,6 +309,7 @@ class ScanConnectSecux extends PureComponent {
         return (
             <SafeAreaView style={styles.mainWrapper}>
                 <KeyboardAwareScrollView style={styles.wrapper} resetScrollToCoords={{ x: 0, y: 0 }}>
+                <Text style={styles.title}>{'Scan Connect Secux'}</Text>
                     {/* <View testID={'import-from-seed-screen'}>
 						<Text style={styles.title}>{'Scan Connect Secux'}</Text>
 
@@ -323,7 +327,7 @@ class ScanConnectSecux extends PureComponent {
 					</View> */}
                 </KeyboardAwareScrollView>
 
-
+                <Image source={image} />
                 <FlatList
                     extraData={[error, deviceId]}
                     style={styles.flatList}

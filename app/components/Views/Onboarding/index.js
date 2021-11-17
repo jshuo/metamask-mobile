@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 	createWrapper: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		marginBottom: 24,
+		marginBottom: 320,
 	},
 	buttonWrapper: {
 		marginBottom: 16,
@@ -461,13 +461,13 @@ class Onboarding extends PureComponent {
 							)}
 							{loading ? this.renderLoader() : this.renderContent()}
 						</View>
-						{existingUser && !loading && (
+						{/* {existingUser && !loading && (
 							<View style={styles.footer}>
 								<Button style={styles.login} onPress={this.onLogin}>
 									{strings('onboarding.login')}
 								</Button>
 							</View>
-						)}
+						)} */}
 					</ScrollView>
 					<View style={styles.termsAndConditions}>
 						<TermsAndConditions navigation={this.props.navigation} />

@@ -133,7 +133,9 @@ const Entry = (props) => {
 			}
 		} catch (error) {
 			Logger.log(`Keychain couldn't be accessed`, error);
-			animateAndGoTo('Login');
+			// animateAndGoTo('Login');
+			// secux hack
+			props.navigation.navigate('HomeNav');
 		}
 	}, [animateAndGoTo, props]);
 

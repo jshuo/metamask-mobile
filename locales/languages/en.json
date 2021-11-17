@@ -30,7 +30,7 @@
 		"title": "Wallet setup",
 		"sync_desc": "If you’ve already got the MetaMask extension or another wallet, sync or import it to manage your existing assets.",
 		"create_desc": "Set up your first wallet and start exploring decentralized apps.",
-		"import": "Import an existing wallet or create a new one",
+		"import": "Import an existing wallet or connect to a hardware wallet",
 		"import_wallet_button": "Sync or import wallet",
 		"new_to_crypto": "New to crypto?",
 		"start_exploring_now": "Create a new wallet",

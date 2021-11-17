@@ -33,7 +33,8 @@ export default class Root extends PureComponent {
 		super(props);
 		SecureKeychain.init(props.foxCode);
 		// Init EntryScriptWeb3 asynchronously on the background
-		EntryScriptWeb3.init();
+		// EntryScriptWeb3.init();
+		// secux hack
 		SplashScreen.hide();
 	}
 
