@@ -243,16 +243,16 @@ class ScanConnectSecux extends PureComponent {
 
             const { KeyringController } = Engine.context;
             await Engine.resetState();
+            console.log(KeyringController.isTest())
+
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
-            // Check if user passed through metrics opt-in screen
-            // const metricsOptIn = await AsyncStorage.getItem(METRICS_OPT_IN);
-            // mark the user as existing so it doesn't see the create password screen again
             await AsyncStorage.setItem(EXISTING_USER, TRUE);
             console.log("ScanConnectSecux Setting Existing User")
             // await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
             this.setState({ loading: false });
-
+            // await KeyringController.setBleConnected()
+            // console.log(KeyringController.isBleConnected())
             this.props.navigation.navigate('HomeNav', {
                 screen: 'WalletView', params: {
                     secuxDeviceHandle: this.state.transport
@@ -261,7 +261,7 @@ class ScanConnectSecux extends PureComponent {
             console.log("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
 
             console.log("ScanConnectSecux: importAdditionalAccounts")
-            await importAdditionalAccounts();
+            // await importAdditionalAccounts();
         } catch (error) {
             // Should we force people to enable passcode / biometrics?
             if (error.toString() === PASSCODE_NOT_SET_ERROR) {
@@ -309,7 +309,11 @@ class ScanConnectSecux extends PureComponent {
         return (
             <SafeAreaView style={styles.mainWrapper}>
                 <KeyboardAwareScrollView style={styles.wrapper} resetScrollToCoords={{ x: 0, y: 0 }}>
-                <Text style={styles.title}>{'Scan Connect Secux'}</Text>
+                <Text style={styles.title}>{'Scan and Connect Secux Device over Bluetooth'}</Text>
+                <Text style={styles.label}>{'Before continuing, please make sure that:'}</Text>
+                <Text style={styles.label}>{'- Bluetooth is enabled on your Smartphone'}</Text>
+                <Text style={styles.label}>{'- SecuX Device is turned on'}</Text>
+                <Text style={styles.label}>{'- Upon turning on bluetooth on smartphone and device, the device name should appear on the screen to click for pairing connection'}</Text>
                     {/* <View testID={'import-from-seed-screen'}>
 						<Text style={styles.title}>{'Scan Connect Secux'}</Text>
 
