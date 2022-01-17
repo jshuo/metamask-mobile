@@ -243,7 +243,7 @@ class ScanConnectSecux extends PureComponent {
 
             const { KeyringController } = Engine.context;
             await Engine.resetState();
-            console.log(KeyringController.isTest())
+            // console.log(KeyringController.isTest())
 
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
