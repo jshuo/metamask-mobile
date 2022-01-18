@@ -32,7 +32,7 @@ import URL from 'url-parse';
 import EthereumAddress from '../EthereumAddress';
 import { getEther } from '../../../util/transactions';
 import { newAssetTransaction } from '../../../actions/transaction';
-import { protectWalletModalVisible } from '../../../actions/user';
+import { logOut, protectWalletModalVisible } from '../../../actions/user';
 import DeeplinkManager from '../../../core/DeeplinkManager';
 import SettingsNotification from '../SettingsNotification';
 import WhatsNewModal from '../WhatsNewModal';
@@ -42,6 +42,7 @@ import { findRouteNameFromNavigatorState } from '../../../util/general';
 import AnalyticsV2, { ANALYTICS_EVENTS_V2 } from '../../../util/analyticsV2';
 import { isDefaultAccountName, doENSReverseLookup } from '../../../util/ENSUtils';
 import ClipboardManager from '../../../core/ClipboardManager';
+import { collectiblesSelector } from '../../../reducers/collectibles';
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -367,6 +368,7 @@ class DrawerView extends PureComponent {
 		 * Prompts protect wallet modal
 		 */
 		protectWalletModalVisible: PropTypes.func,
+		logOut: PropTypes.func,
 	};
 
 	state = {
@@ -561,6 +563,11 @@ class DrawerView extends PureComponent {
 		this.props.navigation.navigate('SettingsView');
 		this.hideDrawer();
 		this.trackEvent(ANALYTICS_EVENT_OPTS.NAVIGATION_TAPS_SETTINGS);
+	};
+
+	logOut = () => {
+		this.props.navigation.navigate('Login');
+		this.props.logOut();
 	};
 
 	onPress = async () => {
@@ -905,6 +912,7 @@ class DrawerView extends PureComponent {
 			showProtectWalletModal,
 			account: { name, ens },
 		} = this.state;
+
 		const account = { address: selectedAddress, ...identities[selectedAddress], ...accounts[selectedAddress] };
 		account.balance = (accounts[selectedAddress] && renderFromWei(accounts[selectedAddress].balance)) || 0;
 		const fiatBalance = Engine.getTotalFiatAccountBalance();
@@ -1139,7 +1147,7 @@ const mapStateToProps = (state) => ({
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	tokens: state.engine.backgroundState.TokensController.tokens,
 	tokenBalances: state.engine.backgroundState.TokenBalancesController.contractBalances,
-	collectibles: state.engine.backgroundState.CollectiblesController.collectibles,
+	collectibles: collectiblesSelector(state),
 	seedphraseBackedUp: state.user.seedphraseBackedUp,
 });
 
@@ -1150,6 +1158,7 @@ const mapDispatchToProps = (dispatch) => ({
 	showAlert: (config) => dispatch(showAlert(config)),
 	newAssetTransaction: (selectedAsset) => dispatch(newAssetTransaction(selectedAsset)),
 	protectWalletModalVisible: () => dispatch(protectWalletModalVisible()),
+	logOut: () => dispatch(logOut()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DrawerView);
