@@ -805,7 +805,7 @@ class Confirm extends PureComponent {
 		});
 	};
 
-	onNext = async () => {
+	onNextSecuX = async () => {
 		const { TransactionController } = Engine.context;
 		const {
 			transactionState: { assetType },
@@ -1332,13 +1332,13 @@ class Confirm extends PureComponent {
 						type={'confirm'}
 						disabled={transactionConfirmed || !gasEstimationReady || Boolean(errorMessage) || isAnimating}
 						containerStyle={styles.buttonNext}
-						onPress={this.onNext}
+						onPress={this.onNextSecuX}
 						testID={'txn-confirm-send-button'}
 					>
 						{transactionConfirmed ? (
 							<ActivityIndicator size="small" color="white" />
 						) : (
-							strings('transaction.send')
+							"SecuX Send"
 						)}
 					</StyledButton>
 				</View>

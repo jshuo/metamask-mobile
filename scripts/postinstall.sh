@@ -10,4 +10,3 @@ yarn jetify
 echo "3. Patch npm packages"
 yarn patch-package
 
-

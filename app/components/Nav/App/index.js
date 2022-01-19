@@ -16,6 +16,7 @@ import ManualBackupStep1 from '../../Views/ManualBackupStep1';
 import ManualBackupStep2 from '../../Views/ManualBackupStep2';
 import ManualBackupStep3 from '../../Views/ManualBackupStep3';
 import ImportFromSeed from '../../Views/ImportFromSeed';
+import ScanConnectSecux from '../../Views/ScanConnectSecuX';
 import SyncWithExtensionSuccess from '../../Views/SyncWithExtensionSuccess';
 import Main from '../Main';
 import DrawerView from '../../UI/DrawerView';
@@ -81,6 +82,11 @@ const OnboardingNav = () => (
 			options={ManualBackupStep3.navigationOptions}
 		/>
 		<Stack.Screen name="ImportFromSeed" component={ImportFromSeed} options={ImportFromSeed.navigationOptions} />
+		<Stack.Screen
+			name="ScanConnectSecux"
+			component={ScanConnectSecux}
+			options={ScanConnectSecux.navigationOptions}
+		/>
 		<Stack.Screen name="OptinMetrics" component={OptinMetrics} options={OptinMetrics.navigationOptions} />
 	</Stack.Navigator>
 );
@@ -289,15 +295,14 @@ const App = ({ userLoggedIn }) => {
 					}}
 				>
 					<Stack.Navigator route={route} initialRouteName={route}>
-						<Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+						{/* <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} /> */}
 						<Stack.Screen
 							name="OnboardingRootNav"
 							component={OnboardingRootNav}
 							options={{ headerShown: false }}
 						/>
-						{userLoggedIn && (
-							<Stack.Screen name="HomeNav" component={HomeNav} options={{ headerShown: false }} />
-						)}
+						<Stack.Screen name="HomeNav" component={HomeNav} options={{ headerShown: false }} />
+						
 					</Stack.Navigator>
 				</NavigationContainer>
 				{renderSplash()}

@@ -65,7 +65,6 @@ coverage
 /app/core/InpageBridgeWeb3.js
 
 # environment variables
-
 .ios.env
 
 # Sentry

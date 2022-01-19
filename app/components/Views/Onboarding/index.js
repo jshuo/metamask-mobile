@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 	createWrapper: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		marginBottom: 24,
+		marginBottom: 320,
 	},
 	buttonWrapper: {
 		marginBottom: 16,
@@ -221,7 +221,7 @@ class Onboarding extends PureComponent {
 		this.mounted = true;
 		this.checkIfExistingUser();
 		InteractionManager.runAfterInteractions(() => {
-			PreventScreenshot.forbid();
+			PreventScreenshot.allow();
 			if (this.props.route.params?.delete) {
 				this.props.setLoading(strings('onboarding.delete_current'));
 				setTimeout(() => {
@@ -260,7 +260,8 @@ class Onboarding extends PureComponent {
 			await SecureKeychain.resetGenericPassword();
 			this.props.navigation.navigate('HomeNav');
 		} else {
-			this.logOut();
+			this.props.navigation.navigate('Login');
+			// secux
 		}
 	};
 
@@ -342,6 +343,20 @@ class Onboarding extends PureComponent {
 		this.handleExistingUser(action);
 	};
 
+	onPressScanConnectSecux = () => {
+		// const action = () => {
+		// 	this.props.navigation.push('ChoosePassword');
+		// 	this.track(ANALYTICS_EVENT_OPTS.ONBOARDING_SELECTED_IMPORT_WALLET);
+		// };
+		// this.handleExistingUser(action);
+
+
+			this.props.navigation.navigate('ScanConnectSecux', {
+				[PREVIOUS_SCREEN]: ONBOARDING
+			});
+
+	};
+
 	track = (...eventArgs) => {
 		InteractionManager.runAfterInteractions(async () => {
 			if (Analytics.getEnabled()) {
@@ -396,27 +411,14 @@ class Onboarding extends PureComponent {
 							{strings('import_wallet.import_from_seed_button')}
 						</StyledButton>
 					</View>
-					{/* Temporarily Disable Sync until the new improved version is ready for release */}
-					{__DEV__ && (
-						<View style={styles.buttonWrapper}>
-							<StyledButton
-								style={styles.button}
-								type={'normal'}
-								onPress={this.onPressSync}
-								testID={'onboarding-import-button'}
-							>
-								{strings('import_wallet.sync_from_browser_extension_button')}
-							</StyledButton>
-						</View>
-					)}
 					<View style={styles.buttonWrapper}>
 						<StyledButton
 							style={styles.button}
 							type={'blue'}
-							onPress={this.onPressCreate}
-							testID={'create-wallet-button'}
+							onPress={this.onPressScanConnectSecux}
+							testID={'scan-connect-secux-button'}
 						>
-							{strings('onboarding.start_exploring_now')}
+							{'Connect to SecuX W20/V20'}
 						</StyledButton>
 					</View>
 				</View>
@@ -465,13 +467,13 @@ class Onboarding extends PureComponent {
 							)}
 							{loading ? this.renderLoader() : this.renderContent()}
 						</View>
-						{existingUser && !loading && (
+						{/* {existingUser && !loading && (
 							<View style={styles.footer}>
 								<Button style={styles.login} onPress={this.onLogin}>
 									{strings('onboarding.login')}
 								</Button>
 							</View>
-						)}
+						)} */}
 					</ScrollView>
 					<View style={styles.termsAndConditions}>
 						<TermsAndConditions navigation={this.props.navigation} />

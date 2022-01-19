@@ -81,22 +81,22 @@ class Settings extends PureComponent {
 					onPress={this.onPressGeneral}
 					title={strings('app_settings.general_title')}
 				/>
-				<SettingsDrawer
+				{/* <SettingsDrawer
 					description={strings('app_settings.security_desc')}
 					onPress={this.onPressSecurity}
 					title={strings('app_settings.security_title')}
 					warning={!seedphraseBackedUp}
-				/>
-				<SettingsDrawer
+				/> */}
+				{/* <SettingsDrawer
 					description={strings('app_settings.advanced_desc')}
 					onPress={this.onPressAdvanced}
 					title={strings('app_settings.advanced_title')}
-				/>
-				<SettingsDrawer
+				/> */}
+				{/* <SettingsDrawer
 					description={strings('app_settings.contacts_desc')}
 					onPress={this.onPressContacts}
 					title={strings('app_settings.contacts_title')}
-				/>
+				/> */}
 				<SettingsDrawer
 					title={strings('app_settings.networks_title')}
 					description={strings('app_settings.networks_desc')}
