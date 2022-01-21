@@ -7,20 +7,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Login from '../../Views/Login';
 import QRScanner from '../../Views/QRScanner';
 import Onboarding from '../../Views/Onboarding';
-import OnboardingCarousel from '../../Views/OnboardingCarousel';
-import ChoosePassword from '../../Views/ChoosePassword';
-import ExtensionSync from '../../Views/ExtensionSync';
-import AccountBackupStep1 from '../../Views/AccountBackupStep1';
-import AccountBackupStep1B from '../../Views/AccountBackupStep1B';
-import ManualBackupStep1 from '../../Views/ManualBackupStep1';
-import ManualBackupStep2 from '../../Views/ManualBackupStep2';
-import ManualBackupStep3 from '../../Views/ManualBackupStep3';
-import ImportFromSeed from '../../Views/ImportFromSeed';
 import ScanConnectSecux from '../../Views/ScanConnectSecuX';
 import SyncWithExtensionSuccess from '../../Views/SyncWithExtensionSuccess';
 import Main from '../Main';
 import DrawerView from '../../UI/DrawerView';
-import OptinMetrics from '../../UI/OptinMetrics';
 import MetaMaskAnimation from '../../UI/MetaMaskAnimation';
 import SimpleWebview from '../../Views/SimpleWebview';
 import SharedDeeplinkManager from '../../../core/DeeplinkManager';
@@ -32,7 +22,7 @@ import { trackErrorAsAnalytics } from '../../../util/analyticsV2';
 import { routingInstrumentation } from '../../../util/setupSentry';
 import Analytics from '../../../core/Analytics';
 import { connect, useSelector, useDispatch } from 'react-redux';
-import { EXISTING_USER, CURRENT_APP_VERSION, LAST_APP_VERSION } from '../../../constants/storage';
+import { EXISTING_USER, CURRENT_APP_VERSION, LAST_APP_VERSION, SECUX_DEVICE_ID } from '../../../constants/storage';
 import { getVersion } from 'react-native-device-info';
 import { checkedAuth } from '../../../actions/user';
 
@@ -47,47 +37,13 @@ const Drawer = createDrawerNavigator();
  * Create Wallet, Import from Seed and Sync
  */
 const OnboardingNav = () => (
-	<Stack.Navigator initialRouteName="OnboardingCarousel">
+	<Stack.Navigator initialRouteName="Onboarding">
 		<Stack.Screen name="Onboarding" component={Onboarding} options={Onboarding.navigationOptions} />
-		<Stack.Screen
-			name="OnboardingCarousel"
-			component={OnboardingCarousel}
-			options={OnboardingCarousel.navigationOptions}
-		/>
-		<Stack.Screen name="ChoosePassword" component={ChoosePassword} options={ChoosePassword.navigationOptions} />
-		<Stack.Screen name="ExtensionSync" component={ExtensionSync} />
-		<Stack.Screen
-			name="AccountBackupStep1"
-			component={AccountBackupStep1}
-			options={AccountBackupStep1.navigationOptions}
-		/>
-		<Stack.Screen
-			name="AccountBackupStep1B"
-			component={AccountBackupStep1B}
-			options={AccountBackupStep1B.navigationOptions}
-		/>
-		<Stack.Screen
-			name="ManualBackupStep1"
-			component={ManualBackupStep1}
-			options={ManualBackupStep1.navigationOptions}
-		/>
-		<Stack.Screen
-			name="ManualBackupStep2"
-			component={ManualBackupStep2}
-			options={ManualBackupStep2.navigationOptions}
-		/>
-		<Stack.Screen
-			name="ManualBackupStep3"
-			component={ManualBackupStep3}
-			options={ManualBackupStep3.navigationOptions}
-		/>
-		<Stack.Screen name="ImportFromSeed" component={ImportFromSeed} options={ImportFromSeed.navigationOptions} />
 		<Stack.Screen
 			name="ScanConnectSecux"
 			component={ScanConnectSecux}
 			options={ScanConnectSecux.navigationOptions}
 		/>
-		<Stack.Screen name="OptinMetrics" component={OptinMetrics} options={OptinMetrics.navigationOptions} />
 	</Stack.Navigator>
 );
 
@@ -160,6 +116,7 @@ const App = ({ userLoggedIn }) => {
 	const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
 	const dispatch = useDispatch();
 	const triggerCheckedAuth = () => dispatch(checkedAuth('onboarding'));
+	const triggerCheckedAuthHomeNav = () => dispatch(checkedAuth('HomeNav'));
 
 	const handleDeeplink = useCallback(({ error, params, uri }) => {
 		if (error) {
@@ -208,10 +165,15 @@ const App = ({ userLoggedIn }) => {
 	useEffect(() => {
 		async function checkExsiting() {
 			const existingUser = await AsyncStorage.getItem(EXISTING_USER);
-			const route = !existingUser ? 'OnboardingRootNav' : 'Login';
+			const secuxDeviceId = await AsyncStorage.getItem(SECUX_DEVICE_ID);
+			console.log(secuxDeviceId)
+			const route = !existingUser ? 'OnboardingRootNav' : 'HomeNav';
 			setRoute(route);
-			if (!existingUser) {
+			if (!existingUser || !secuxDeviceId) {
 				triggerCheckedAuth();
+			} else {
+			    console.log('device id and user exist', route)
+				triggerCheckedAuthHomeNav()
 			}
 		}
 

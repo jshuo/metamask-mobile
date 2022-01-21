@@ -404,15 +404,6 @@ class Onboarding extends PureComponent {
 				<View style={styles.createWrapper}>
 					<View style={styles.buttonWrapper}>
 						<StyledButton
-							type={'normal'}
-							onPress={this.onPressImport}
-							testID={'import-wallet-import-from-seed-button'}
-						>
-							{strings('import_wallet.import_from_seed_button')}
-						</StyledButton>
-					</View>
-					<View style={styles.buttonWrapper}>
-						<StyledButton
 							style={styles.button}
 							type={'blue'}
 							onPress={this.onPressScanConnectSecux}

@@ -22,14 +22,11 @@ import { setLockTime } from '../../../actions/settings';
 import StyledButton from '../../UI/StyledButton';
 import Engine from '../../../core/Engine';
 import { colors, fontStyles } from '../../../styles/common';
-import { strings } from '../../../../locales/i18n';
-import SecureKeychain from '../../../core/SecureKeychain';
-import AppConstants from '../../../core/AppConstants';
 import setOnboardingWizardStep from '../../../actions/wizard';
 import DeviceItem from './DeviceItem'
 import Device from '../../../util/device';
 import {
-    SEED_PHRASE_HINTS,
+    SECUX_DEVICE_ID,
     BIOMETRY_CHOICE_DISABLED,
     NEXT_MAKER_REMINDER,
     ONBOARDING_WIZARD,
@@ -109,10 +106,6 @@ const styles = StyleSheet.create({
 const PASSCODE_NOT_SET_ERROR = 'Error: Passcode not set.';
 
 
-/**
- * View where users can set restore their account
- * using a seed phrase
- */
 class ScanConnectSecux extends PureComponent {
 
     state = {
@@ -164,12 +157,12 @@ class ScanConnectSecux extends PureComponent {
                 transport
             })
             // secux hack
-            let otp = '42960705'
-            console.log(otp)
-            await transport.SendOTP(otp);
+            // let otp = '42960705'
+            // console.log(otp)
+            // await transport.SendOTP(otp);
 
             // show otp dialog
-            // this.setState({ showDialog: true });
+            this.setState({ showDialog: true });
 
             this.setState({ refreshing: false })
             this.onConnectBLE();
@@ -247,6 +240,7 @@ class ScanConnectSecux extends PureComponent {
 
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
+            await AsyncStorage.setItem(SECUX_DEVICE_ID, this.state.deviceId);
             await AsyncStorage.setItem(EXISTING_USER, TRUE);
             console.log("ScanConnectSecux Setting Existing User")
             // await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
