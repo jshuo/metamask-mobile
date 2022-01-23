@@ -40,6 +40,7 @@ import importAdditionalAccounts from '../../../util/importAdditionalAccounts';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
 import image from '../../../images/secux_w20.png'
+import {addRecent, connectedDevice} from '../../../actions/recents';
 
 
 const styles = StyleSheet.create({
@@ -117,7 +118,7 @@ class ScanConnectSecux extends PureComponent {
         error: null,
         refreshing: false,
         waiting: false,
-        transport: null,
+        transport: this.props.transport,
         otp: '',
         showDialog: false,
     };
@@ -141,7 +142,8 @@ class ScanConnectSecux extends PureComponent {
     _onSelectDevice = async (device) => {
         SecuxReactNativeBLE.StopScan();
         if (this.state.deviceId != null) return
-
+        // const { loading, recents} = this.state;
+        const { recents } = this.props;
         const { onConnectBLE } = this.props
         try {
             if (device.id == null) {
@@ -154,17 +156,20 @@ class ScanConnectSecux extends PureComponent {
                 deviceId: device.id,
                 refreshing: false,
                 waiting: true,
-                transport
+                transport: transport
             })
+            console.log(addRecent)
+            console.log(connectedDevice)
+            connectedDevice(transport)
             // secux hack
-            // let otp = '42960705'
-            // console.log(otp)
-            // await transport.SendOTP(otp);
+            let otp = '42960705'
+            console.log(otp)
+            await transport.SendOTP(otp);
 
             // show otp dialog
-            this.setState({ showDialog: true });
+            // this.setState({ showDialog: true });
 
-            this.setState({ refreshing: false })
+            // this.setState({ refreshing: false })
             this.onConnectBLE();
 
         } catch (e) {
@@ -218,6 +223,7 @@ class ScanConnectSecux extends PureComponent {
 
     async componentDidMount() {
         this._isMounted = true
+        console.log(this.props)
         if (Platform.OS === 'android') {
             await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -229,7 +235,7 @@ class ScanConnectSecux extends PureComponent {
     }
 
     onConnectBLE = async () => {
-        const { loading, seed, password, confirmPassword } = this.state;
+
 
         try {
             this.setState({ loading: true });
@@ -248,10 +254,11 @@ class ScanConnectSecux extends PureComponent {
             // await KeyringController.setBleConnected()
             // console.log(KeyringController.isBleConnected())
             this.props.navigation.navigate('HomeNav', {
-                screen: 'WalletView', params: {
-                    secuxDeviceHandle: this.state.transport
-                }
-            });
+				screen: 'WalletView'
+			});
+
+            this.props.connectedDevice(this.state.transport)
+
             console.log("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
 
             console.log("ScanConnectSecux: importAdditionalAccounts")
@@ -342,19 +349,20 @@ class ScanConnectSecux extends PureComponent {
                         <Dialog.Button label="OK" onPress={this.otp_processing} />
                     </Dialog.Container>
                 </View>
-
+                {waiting && <ActivityIndicator />}
             </SafeAreaView>
         );
     }
 }
+function mapStateToProps(state){
+    return{
+        connectedDevice : state.connectedDevice
+    };
+  }
 
-const mapDispatchToProps = dispatch => ({
-    setLockTime: time => dispatch(setLockTime(time)),
-    setOnboardingWizardStep: step => dispatch(setOnboardingWizardStep(step)),
-    passwordSet: () => dispatch(passwordSet()),
-    seedphraseBackedUp: () => dispatch(seedphraseBackedUp())
+  const mapDispatchToProps = (dispatch) => ({
+	connectedDevice: (transport) => dispatch(connectedDevice(transport)),
 });
-
 export default connect(
     null,
     mapDispatchToProps

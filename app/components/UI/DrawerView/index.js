@@ -369,6 +369,7 @@ class DrawerView extends PureComponent {
 		 */
 		protectWalletModalVisible: PropTypes.func,
 		logOut: PropTypes.func,
+		recents: PropTypes.array,
 	};
 
 	state = {
@@ -458,12 +459,15 @@ class DrawerView extends PureComponent {
 			DeeplinkManager.expireDeeplink();
 			DeeplinkManager.parse(pendingDeeplink, { origin: AppConstants.DEEPLINKS.ORIGIN_DEEPLINK });
 		}
-		await this.updateAccountInfo();
+		// await this.updateAccountInfo();
+		
 	}
 
 	updateAccountInfo = async () => {
 		const { identities, network, selectedAddress } = this.props;
 		const { currentNetwork, address, name } = this.state.account;
+		console.log('drawer view')
+		console.log(identities[selectedAddress].name)
 		const accountName = identities[selectedAddress].name;
 		if (currentNetwork !== network || address !== selectedAddress || name !== accountName) {
 			const ens = await doENSReverseLookup(selectedAddress, network.provider.chainId);
@@ -571,17 +575,20 @@ class DrawerView extends PureComponent {
 	};
 
 	onPress = async () => {
-		const { passwordSet } = this.props;
+		const { passwordSet, connectedDevice } = this.props;
 		const { KeyringController } = Engine.context;
 		await SecureKeychain.resetGenericPassword();
 		await KeyringController.setLocked();
 		if (!passwordSet) {
+			console.log('secux ble disconnect')
+			connectedDevice.Disconnect()
 			this.props.navigation.navigate('OnboardingRootNav', {
 				screen: 'OnboardingNav',
 				params: { screen: 'Onboarding' },
 			});
 		} else {
 			// secux hack
+			console.log('secux ble disconnect')
 			this.props.navigation.navigate('OnboardingRootNav', {
 				screen: 'OnboardingNav',
 				params: { screen: 'Onboarding' },
@@ -1143,6 +1150,7 @@ const mapStateToProps = (state) => ({
 	accountsModalVisible: state.modals.accountsModalVisible,
 	receiveModalVisible: state.modals.receiveModalVisible,
 	passwordSet: state.user.passwordSet,
+	connectedDevice: state.recents.connectedDevice,
 	wizard: state.wizard,
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	tokens: state.engine.backgroundState.TokensController.tokens,
