@@ -15,6 +15,7 @@ import notificationReducer from './notification';
 import infuraAvailabilityReducer from './infuraAvailability';
 import collectiblesReducer from './collectibles';
 import recentsReducer from './recents';
+import bleTransportReducer from './bleTransport';
 import { combineReducers } from 'redux';
 
 const rootReducer = combineReducers({
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
 	privacy: privacyReducer,
 	bookmarks: bookmarksReducer,
 	recents: recentsReducer,
+	bleTransport: bleTransportReducer,
 	browser: browserReducer,
 	modals: modalsReducer,
 	settings: settingsReducer,

@@ -43,7 +43,7 @@ import AnalyticsV2, { ANALYTICS_EVENTS_V2 } from '../../../util/analyticsV2';
 import { isDefaultAccountName, doENSReverseLookup } from '../../../util/ENSUtils';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { collectiblesSelector } from '../../../reducers/collectibles';
-import {changeStatus, connectedDevice} from '../../../actions/recents';
+import {changeStatus, connectedDevice} from '../../../actions/bleTransport';
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -583,8 +583,8 @@ class DrawerView extends PureComponent {
 		if (!passwordSet) {
 			console.log('secux ble disconnect')
 			if (status === 'connected') {
-				connectedDevice.Disconnect()
 				this.props.changeStatus('disconnected')
+				connectedDevice.Disconnect()
 			}
 
 			this.props.navigation.navigate('OnboardingRootNav', {
@@ -792,7 +792,6 @@ class DrawerView extends PureComponent {
 				{
 					name: strings('drawer.settings'),
 					icon: this.getFeatherIcon('settings'),
-					warning: strings('drawer.settings_warning_short'),
 					action: this.showSettings,
 				},
 				{
@@ -1155,8 +1154,8 @@ const mapStateToProps = (state) => ({
 	accountsModalVisible: state.modals.accountsModalVisible,
 	receiveModalVisible: state.modals.receiveModalVisible,
 	passwordSet: state.user.passwordSet,
-	connectedDevice: state.recents.connectedDevice,
-	status: state.recents.status,
+	connectedDevice: state.bleTransport.connectedDevice,
+	status: state.bleTransport.status,
 	wizard: state.wizard,
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	tokens: state.engine.backgroundState.TokensController.tokens,

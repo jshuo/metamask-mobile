@@ -31,7 +31,7 @@ import Logger from '../../../util/Logger';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
 import image from '../../../images/secux_w20.png'
-import { changeStatus, connectedDevice } from '../../../actions/recents';
+import { changeStatus, connectedDevice } from '../../../actions/bleTransport';
 import setOnboardingWizardStep from '../../../actions/wizard';
 
 
