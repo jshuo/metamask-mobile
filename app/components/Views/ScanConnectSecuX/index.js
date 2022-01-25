@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import { logOut } from '../../../actions/user';
 import {
     FlatList,
     ActivityIndicator,
@@ -15,32 +15,24 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { getOnboardingNavbarOptions } from '../../UI/Navbar';
 import { connect } from 'react-redux';
-import { passwordSet, seedphraseBackedUp } from '../../../actions/user';
-import { setLockTime } from '../../../actions/settings';
-import StyledButton from '../../UI/StyledButton';
 import Engine from '../../../core/Engine';
 import { colors, fontStyles } from '../../../styles/common';
-import setOnboardingWizardStep from '../../../actions/wizard';
 import DeviceItem from './DeviceItem'
 import Device from '../../../util/device';
 import {
     SECUX_DEVICE_ID,
-    BIOMETRY_CHOICE_DISABLED,
     NEXT_MAKER_REMINDER,
-    ONBOARDING_WIZARD,
     EXISTING_USER,
     METRICS_OPT_IN,
     TRUE
 } from '../../../constants/storage';
 import Logger from '../../../util/Logger';
-import { getPasswordStrengthWord, passwordRequirementsMet, MIN_PASSWORD_LENGTH } from '../../../util/password';
-import importAdditionalAccounts from '../../../util/importAdditionalAccounts';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
 import image from '../../../images/secux_w20.png'
-import {addRecent, connectedDevice} from '../../../actions/recents';
+import { changeStatus, connectedDevice } from '../../../actions/recents';
+import setOnboardingWizardStep from '../../../actions/wizard';
 
 
 const styles = StyleSheet.create({
@@ -139,6 +131,12 @@ class ScanConnectSecux extends PureComponent {
         SecuxReactNativeBLE.StartScan(this._AddDevice, this._DeleteDevice);
     }
 
+    handleDisconnected = () => {
+        console.log('ScanConnect handleDisconnected')
+        this.props.changeStatus('disconnected')
+        this.props.logOut()
+    }
+
     _onSelectDevice = async (device) => {
         SecuxReactNativeBLE.StopScan();
         if (this.state.deviceId != null) return
@@ -150,7 +148,7 @@ class ScanConnectSecux extends PureComponent {
                 // should never happen
                 throw new Error('device id is null')
             }
-            const transport = await SecuxReactNativeBLE.Create(device.id);
+            const transport = await SecuxReactNativeBLE.Create(device.id, this.handleConnected, this.handleDisconnected);
             await transport.Connect();
             this.setState({
                 deviceId: device.id,
@@ -158,9 +156,9 @@ class ScanConnectSecux extends PureComponent {
                 waiting: true,
                 transport: transport
             })
-            console.log(addRecent)
-            console.log(connectedDevice)
-            connectedDevice(transport)
+            // console.log(addRecent)
+            // console.log(connectedDevice)
+            // connectedDevice(transport)
             // secux hack
             let otp = '42960705'
             console.log(otp)
@@ -223,7 +221,7 @@ class ScanConnectSecux extends PureComponent {
 
     async componentDidMount() {
         this._isMounted = true
-        console.log(this.props)
+        this.props.changeStatus('disconnected')
         if (Platform.OS === 'android') {
             await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -251,17 +249,10 @@ class ScanConnectSecux extends PureComponent {
             console.log("ScanConnectSecux Setting Existing User")
             // await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
             this.setState({ loading: false });
-            // await KeyringController.setBleConnected()
-            // console.log(KeyringController.isBleConnected())
-            this.props.navigation.navigate('HomeNav', {
-				screen: 'WalletView'
-			});
-
+            this.props.setOnboardingWizardStep(0);
+            this.props.navigation.replace('HomeNav', { screen: 'WalletView' });
             this.props.connectedDevice(this.state.transport)
-
-            console.log("ScanConnectSecux: this.props.navigation.navigate('HomeNav', { screen: 'WalletView' })")
-
-            console.log("ScanConnectSecux: importAdditionalAccounts")
+            this.props.changeStatus('connected')
             // await importAdditionalAccounts();
         } catch (error) {
             // Should we force people to enable passcode / biometrics?
@@ -310,11 +301,11 @@ class ScanConnectSecux extends PureComponent {
         return (
             <SafeAreaView style={styles.mainWrapper}>
                 <KeyboardAwareScrollView style={styles.wrapper} resetScrollToCoords={{ x: 0, y: 0 }}>
-                <Text style={styles.title}>{'Scan and Connect Secux Device over Bluetooth'}</Text>
-                <Text style={styles.label}>{'Before continuing, please make sure that:'}</Text>
-                <Text style={styles.label}>{'- Bluetooth is enabled on your Smartphone'}</Text>
-                <Text style={styles.label}>{'- SecuX Device is turned on'}</Text>
-                <Text style={styles.label}>{'- Upon turning on bluetooth on smartphone and device, the device name should appear on the screen to click for pairing connection'}</Text>
+                    <Text style={styles.title}>{'Scan and Connect Secux Device over Bluetooth'}</Text>
+                    <Text style={styles.label}>{'Before continuing, please make sure that:'}</Text>
+                    <Text style={styles.label}>{'- Bluetooth is enabled on your Smartphone'}</Text>
+                    <Text style={styles.label}>{'- SecuX Device is turned on'}</Text>
+                    <Text style={styles.label}>{'- Upon turning on bluetooth on smartphone and device, the device name should appear on the screen to click for pairing connection'}</Text>
                     {/* <View testID={'import-from-seed-screen'}>
 						<Text style={styles.title}>{'Scan Connect Secux'}</Text>
 
@@ -354,14 +345,12 @@ class ScanConnectSecux extends PureComponent {
         );
     }
 }
-function mapStateToProps(state){
-    return{
-        connectedDevice : state.connectedDevice
-    };
-  }
 
-  const mapDispatchToProps = (dispatch) => ({
-	connectedDevice: (transport) => dispatch(connectedDevice(transport)),
+const mapDispatchToProps = (dispatch) => ({
+    setOnboardingWizardStep: (step) => dispatch(setOnboardingWizardStep(step)),
+    connectedDevice: (transport) => dispatch(connectedDevice(transport)),
+    changeStatus: (status) => dispatch(changeStatus(status)),
+    logOut: () => dispatch(logOut()),
 });
 export default connect(
     null,

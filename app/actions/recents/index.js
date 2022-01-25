@@ -1,4 +1,4 @@
-export function addRecent(recent) {
+export default function addRecent(recent) {
 	return {
 		type: 'ADD_RECENT',
 		recent,
@@ -33,9 +33,9 @@ export function connectedDevice(device) {
 // 	}
 // }
 
-// export function changeStatus(status) {
-// 	return {
-// 		type: "CHANGE_STATUS",
-// 		status: status
-// 	}
-// };
+export function changeStatus(status) {
+	return {
+		type: "CHANGE_STATUS",
+		status: status
+	}
+};

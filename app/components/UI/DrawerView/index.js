@@ -43,6 +43,7 @@ import AnalyticsV2, { ANALYTICS_EVENTS_V2 } from '../../../util/analyticsV2';
 import { isDefaultAccountName, doENSReverseLookup } from '../../../util/ENSUtils';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { collectiblesSelector } from '../../../reducers/collectibles';
+import {changeStatus, connectedDevice} from '../../../actions/recents';
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -460,7 +461,7 @@ class DrawerView extends PureComponent {
 			DeeplinkManager.parse(pendingDeeplink, { origin: AppConstants.DEEPLINKS.ORIGIN_DEEPLINK });
 		}
 		// await this.updateAccountInfo();
-		
+
 	}
 
 	updateAccountInfo = async () => {
@@ -575,13 +576,17 @@ class DrawerView extends PureComponent {
 	};
 
 	onPress = async () => {
-		const { passwordSet, connectedDevice } = this.props;
+		const { passwordSet, connectedDevice, status } = this.props;
 		const { KeyringController } = Engine.context;
 		await SecureKeychain.resetGenericPassword();
 		await KeyringController.setLocked();
 		if (!passwordSet) {
 			console.log('secux ble disconnect')
-			connectedDevice.Disconnect()
+			if (status === 'connected') {
+				connectedDevice.Disconnect()
+				this.props.changeStatus('disconnected')
+			}
+
 			this.props.navigation.navigate('OnboardingRootNav', {
 				screen: 'OnboardingNav',
 				params: { screen: 'Onboarding' },
@@ -1151,6 +1156,7 @@ const mapStateToProps = (state) => ({
 	receiveModalVisible: state.modals.receiveModalVisible,
 	passwordSet: state.user.passwordSet,
 	connectedDevice: state.recents.connectedDevice,
+	status: state.recents.status,
 	wizard: state.wizard,
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	tokens: state.engine.backgroundState.TokensController.tokens,
@@ -1160,6 +1166,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
+	changeStatus: (status) => dispatch(changeStatus(status)),
 	toggleNetworkModal: () => dispatch(toggleNetworkModal()),
 	toggleAccountsModal: () => dispatch(toggleAccountsModal()),
 	toggleReceiveModal: () => dispatch(toggleReceiveModal()),
