@@ -43,7 +43,7 @@ import AnalyticsV2, { ANALYTICS_EVENTS_V2 } from '../../../util/analyticsV2';
 import { isDefaultAccountName, doENSReverseLookup } from '../../../util/ENSUtils';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { collectiblesSelector } from '../../../reducers/collectibles';
-import {changeStatus, connectedDevice} from '../../../actions/bleTransport';
+import { changeStatus, connectedDevice } from '../../../actions/bleTransport';
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -580,11 +580,20 @@ class DrawerView extends PureComponent {
 		const { KeyringController } = Engine.context;
 		await SecureKeychain.resetGenericPassword();
 		await KeyringController.setLocked();
+
 		if (!passwordSet) {
-			console.log('secux ble disconnect')
-			if (status === 'connected') {
-				this.props.changeStatus('disconnected')
-				connectedDevice.Disconnect()
+			try {
+				// using Redux for Ble status is sufficent? 
+				// or to use react-native ble isConnected to get real time status 
+				if (status === 'connected' || await connectedDevice.isConnected()) {
+					console.log(await connectedDevice.isConnected())
+					this.props.changeStatus('disconnected')
+					connectedDevice.Disconnect()
+				}
+
+			} catch (error) {
+				console.log('Device Not Connected: ', error)
+
 			}
 
 			this.props.navigation.navigate('OnboardingRootNav', {

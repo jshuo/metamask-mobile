@@ -1,16 +1,16 @@
-export default function connectedDevice(device) {
+export function connectedDevice(device) {
 	return {
 		type: "CONNECTED_DEVICE",
 		connectedDevice: device
 	}
 };
 
-// export function addRecent(recent) {
-// 	return {
-// 		type: 'ADD_RECENT',
-// 		recent,
-// 	};
-// }
+export function changeStatus(status) {
+	return {
+		type: "CHANGE_STATUS",
+		status: status
+	}
+};
 
 // export function addBLE(device) {
 // 	return {
@@ -26,9 +26,3 @@ export default function connectedDevice(device) {
 // 	}
 // }
 
-export function changeStatus(status) {
-	return {
-		type: "CHANGE_STATUS",
-		status: status
-	}
-};

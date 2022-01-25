@@ -24,7 +24,6 @@ import {
     SECUX_DEVICE_ID,
     NEXT_MAKER_REMINDER,
     EXISTING_USER,
-    METRICS_OPT_IN,
     TRUE
 } from '../../../constants/storage';
 import Logger from '../../../util/Logger';
@@ -96,8 +95,6 @@ const styles = StyleSheet.create({
     }
 });
 
-const PASSCODE_NOT_SET_ERROR = 'Error: Passcode not set.';
-
 
 class ScanConnectSecux extends PureComponent {
 
@@ -136,13 +133,12 @@ class ScanConnectSecux extends PureComponent {
         this.props.changeStatus('disconnected')
         this.props.logOut()
     }
-
+    handleConnected = () => {
+        console.log('ScanConnect handleConnected')
+    }
     _onSelectDevice = async (device) => {
         SecuxReactNativeBLE.StopScan();
         if (this.state.deviceId != null) return
-        // const { loading, recents} = this.state;
-        const { recents } = this.props;
-        const { onConnectBLE } = this.props
         try {
             if (device.id == null) {
                 // should never happen
@@ -156,9 +152,6 @@ class ScanConnectSecux extends PureComponent {
                 waiting: true,
                 transport: transport
             })
-            // console.log(addRecent)
-            // console.log(connectedDevice)
-            // connectedDevice(transport)
             // secux hack
             let otp = '42960705'
             console.log(otp)
@@ -234,20 +227,17 @@ class ScanConnectSecux extends PureComponent {
 
     onConnectBLE = async () => {
 
-
         try {
             this.setState({ loading: true });
 
             const { KeyringController } = Engine.context;
             await Engine.resetState();
-            // console.log(KeyringController.isTest())
 
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
             await AsyncStorage.setItem(SECUX_DEVICE_ID, this.state.deviceId);
             await AsyncStorage.setItem(EXISTING_USER, TRUE);
             console.log("ScanConnectSecux Setting Existing User")
-            // await AsyncStorage.removeItem(SEED_PHRASE_HINTS);
             this.setState({ loading: false });
             this.props.setOnboardingWizardStep(0);
             this.props.navigation.replace('HomeNav', { screen: 'WalletView' });
@@ -255,17 +245,8 @@ class ScanConnectSecux extends PureComponent {
             this.props.changeStatus('connected')
             // await importAdditionalAccounts();
         } catch (error) {
-            // Should we force people to enable passcode / biometrics?
-            if (error.toString() === PASSCODE_NOT_SET_ERROR) {
-                Alert.alert(
-                    'Security Alert',
-                    'In order to proceed, you need to turn Passcode on or any biometrics authentication method supported in your device (FaceID, TouchID or Fingerprint)'
-                );
-                this.setState({ loading: false });
-            } else {
-                this.setState({ loading: false, error: error.toString() });
-                Logger.log('Error with seed phrase import', error);
-            }
+            console.log('onConnectBLE Error: ', error)
+
         }
     };
 
