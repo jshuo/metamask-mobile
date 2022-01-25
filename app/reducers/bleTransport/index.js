@@ -1,6 +1,6 @@
 const INITIAL_STATE = {
 	connectedDevice: {}, // the current connected BLE device
-	status: 'disconnected' // the status of the BLE connection
+	bleStatus: 'disconnected' // the status of the BLE connection
 };
 
 const bleTransportReducer = (state = INITIAL_STATE, action) => {
@@ -12,10 +12,10 @@ const bleTransportReducer = (state = INITIAL_STATE, action) => {
 				connectedDevice: action.connectedDevice,
 			};
 		case 'CHANGE_STATUS':
-			console.log("change status:", action.status)
+			console.log("change status:", action.bleStatus)
 			return {
 				...state,
-				status: action.status
+				bleStatus: action.bleStatus
 			}
 		default:
 			return state;

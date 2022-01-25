@@ -5,10 +5,10 @@ export function connectedDevice(device) {
 	}
 };
 
-export function changeStatus(status) {
+export function changeStatus(bleStatus) {
 	return {
 		type: "CHANGE_STATUS",
-		status: status
+		bleStatus: bleStatus
 	}
 };
 

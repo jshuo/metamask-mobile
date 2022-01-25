@@ -576,7 +576,7 @@ class DrawerView extends PureComponent {
 	};
 
 	onPress = async () => {
-		const { passwordSet, connectedDevice, status } = this.props;
+		const { passwordSet, connectedDevice, bleStatus } = this.props;
 		const { KeyringController } = Engine.context;
 		await SecureKeychain.resetGenericPassword();
 		await KeyringController.setLocked();
@@ -585,7 +585,7 @@ class DrawerView extends PureComponent {
 			try {
 				// using Redux for Ble status is sufficent? 
 				// or to use react-native ble isConnected to get real time status 
-				if (status === 'connected' || await connectedDevice.isConnected()) {
+				if (bleStatus === 'connected' || await connectedDevice.isConnected()) {
 					console.log(await connectedDevice.isConnected())
 					this.props.changeStatus('disconnected')
 					connectedDevice.Disconnect()
@@ -1164,7 +1164,7 @@ const mapStateToProps = (state) => ({
 	receiveModalVisible: state.modals.receiveModalVisible,
 	passwordSet: state.user.passwordSet,
 	connectedDevice: state.bleTransport.connectedDevice,
-	status: state.bleTransport.status,
+	bleStatus: state.bleTransport.bleStatus,
 	wizard: state.wizard,
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	tokens: state.engine.backgroundState.TokensController.tokens,
