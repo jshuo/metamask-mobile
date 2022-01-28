@@ -30,6 +30,8 @@ import { colors, fontStyles, baseStyles } from '../../../styles/common';
 import { allowedToBuy } from '../FiatOrders';
 import AssetSwapButton from '../Swaps/components/AssetSwapButton';
 import ClipboardManager from '../../../core/ClipboardManager';
+import { hexToBN, weiToFiat, renderFromWei } from '../../../util/number';
+const { SecuxScreenDevice } = require("@secux/protocol-device/lib/protocol-screendevice");
 
 const styles = StyleSheet.create({
 	scrollView: {
@@ -177,6 +179,7 @@ class AccountOverview extends PureComponent {
 		accountLabel: '',
 		originalAccountLabel: '',
 		ens: undefined,
+		deviceUpdateLocked: false
 	};
 
 	editableLabelRef = React.createRef();
@@ -206,14 +209,46 @@ class AccountOverview extends PureComponent {
 		InteractionManager.runAfterInteractions(() => {
 			this.doENSLookup();
 		});
-	};
 
-	componentDidUpdate(prevProps) {
+		this.interval = setInterval( async () => {
+			const { identities, selectedAddress, account, connectedDevice, network } = this.props;
+			const balance = renderFromWei(account.balance)
+			const name = renderAccountName(selectedAddress, identities);
+			const path = `m/44'/60'/0'/0/0'`;
+			const chainId = parseInt(network, 10)
+			if (connectedDevice !== undefined) {
+				console.log('updating device account info: ' + balance)
+				await SecuxScreenDevice.SetAccount(connectedDevice, { name, path, balance, chainId  })
+				clearInterval(this.interval)
+			}
+		}, 10000);
+
+	};
+	componentWillUnmount() {
+		if(this.interval){
+			clearInterval(this.interval)
+		  }
+	}
+	componentDidUpdate = async(prevProps) => {
 		if (prevProps.account.address !== this.props.account.address || prevProps.network !== this.props.network) {
 			requestAnimationFrame(() => {
 				this.doENSLookup();
 			});
 		}
+
+		if(prevProps.account.balance !== this.props.account.balance) {
+			const { identities, selectedAddress, account, connectedDevice, network } = this.props;
+			const balance = renderFromWei(account.balance)
+			const name = renderAccountName(selectedAddress, identities);
+			const path = `m/44'/60'/0'/0/0'`;
+			const chainId = parseInt(network, 10)
+			if (connectedDevice !== undefined) {
+				console.log('updating device account info: ' + balance)
+				await SecuxScreenDevice.SetAccount(connectedDevice, { name, path, balance, chainId  })
+			}
+		}
+
+
 	}
 
 	setAccountLabel = () => {
@@ -261,6 +296,11 @@ class AccountOverview extends PureComponent {
 	onReceive = () => this.props.toggleReceiveModal();
 
 	onSend = () => {
+		try {
+			this.setState({deviceUpdateLocked:true})
+		} catch {
+            console.log('set device update lock error')
+		}
 		const { newAssetTransaction, navigation, ticker } = this.props;
 		newAssetTransaction(getEther(ticker));
 		navigation.navigate('SendFlowView');
@@ -291,23 +331,21 @@ class AccountOverview extends PureComponent {
 			const ens = await doENSReverseLookup(account.address, network);
 			this.setState({ ens });
 			// eslint-disable-next-line no-empty
-		} catch {}
+		} catch { }
 	};
 
 	render() {
 		const {
-			account: { address, name },
+			account: { address, name, balance },
 			currentCurrency,
 			onboardingWizard,
 			chainId,
 			swapsIsLive,
-		} = this.props;
+		} = this.props
 
 		const fiatBalance = `${renderFiat(Engine.getTotalFiatAccountBalance(), currentCurrency)}`;
-
 		if (!address) return null;
 		const { accountLabelEditable, accountLabel, ens } = this.state;
-
 		return (
 			<View style={baseStyles.flexGrow} ref={this.scrollViewContainer} collapsable={false}>
 				<ScrollView
@@ -414,7 +452,10 @@ const mapStateToProps = (state) => ({
 	ticker: state.engine.backgroundState.NetworkController.provider.ticker,
 	network: state.engine.backgroundState.NetworkController.network,
 	swapsIsLive: swapsLivenessSelector(state),
+	connectedDevice: state.bleTransport.connectedDevice,
+	bleStatus: state.bleTransport.bleStatus,
 });
+
 
 const mapDispatchToProps = (dispatch) => ({
 	showAlert: (config) => dispatch(showAlert(config)),

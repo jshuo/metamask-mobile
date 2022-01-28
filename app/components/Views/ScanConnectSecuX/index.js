@@ -29,7 +29,6 @@ import {
 import Logger from '../../../util/Logger';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
-import image from '../../../images/secux_w20.png'
 import { changeStatus, connectedDevice } from '../../../actions/bleTransport';
 import setOnboardingWizardStep from '../../../actions/wizard';
 
@@ -128,10 +127,15 @@ class ScanConnectSecux extends PureComponent {
         SecuxReactNativeBLE.StartScan(this._AddDevice, this._DeleteDevice);
     }
 
-    handleDisconnected = () => {
+    handleDisconnected = async () => {
         console.log('ScanConnect handleDisconnected')
         this.props.changeStatus('disconnected')
-        this.props.logOut()
+        const { KeyringController } = Engine.context;
+		await KeyringController.setLocked();
+        this.props.navigation.navigate('OnboardingRootNav', {
+            screen: 'OnboardingNav',
+            params: { screen: 'Onboarding' },
+        });
     }
     handleConnected = () => {
         console.log('ScanConnect handleConnected')
@@ -165,13 +169,8 @@ class ScanConnectSecux extends PureComponent {
 
         } catch (e) {
             Logger.log(e)
-            if (e instanceof RejectedByUserError) {
-                this.reload()
-                return
-            }
-            this._setStateSafe({ error: e })
         } finally {
-            this._setStateSafe({ waiting: false })
+            Logger.log('_onSelectDevice done')
         }
     }
 
@@ -240,7 +239,8 @@ class ScanConnectSecux extends PureComponent {
             console.log("ScanConnectSecux Setting Existing User")
             this.setState({ loading: false });
             this.props.setOnboardingWizardStep(0);
-            this.props.navigation.replace('HomeNav', { screen: 'WalletView' });
+            this.props.navigation.replace('HomeNav', { 
+                screen: 'WalletView'});
             this.props.connectedDevice(this.state.transport)
             this.props.changeStatus('connected')
             // await importAdditionalAccounts();
@@ -304,7 +304,7 @@ class ScanConnectSecux extends PureComponent {
 					</View> */}
                 </KeyboardAwareScrollView>
 
-                <Image source={image} />
+
                 <FlatList
                     extraData={[error, deviceId]}
                     style={styles.flatList}

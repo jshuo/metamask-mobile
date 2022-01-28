@@ -2179,6 +2179,13 @@
     rlp "^2.2.6"
     wallet-address-validator "^0.2.4"
 
+"@secux/protocol-device@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@secux/protocol-device/-/protocol-device-2.1.1.tgz#363038f4260220ed570e8f2378a2516ac784fdd0"
+  integrity sha512-9vf6eIa/0w4qNW9lCNBc4gEz2vMxj4+teMdvsMXMJTUQCvcRAJxB6IdjG2kxkrILk2yBB3Jj/y8B2DfkWnLJug==
+  dependencies:
+    "@secux/utility" "^2.0.4"
+
 "@secux/protocol-transaction@^2.1.3":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@secux/protocol-transaction/-/protocol-transaction-2.1.4.tgz#61f3bf5390887466482e185fb4376c28feb2e2c7"
@@ -2205,7 +2212,7 @@
   dependencies:
     bignumber.js "^9.0.1"
 
-"@secux/utility@^2.0.7":
+"@secux/utility@^2.0.4", "@secux/utility@^2.0.7":
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/@secux/utility/-/utility-2.0.7.tgz#b369b9d33ea4e8c2ca08710424557e64389965a7"
   integrity sha512-q/KW/uZfb2d5AV8CqIY1JJUSsk0atn5BkLb1iTV6nea3lnHcNySrBe6sFiTM4fgWQVRt+qxREwURytKM/jKkGQ==

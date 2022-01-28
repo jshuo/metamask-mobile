@@ -37,7 +37,7 @@ import { PREVIOUS_SCREEN, ONBOARDING } from '../../../constants/navigation';
 import { EXISTING_USER, METRICS_OPT_IN } from '../../../constants/storage';
 import AnalyticsV2 from '../../../util/analyticsV2';
 import DefaultPreference from 'react-native-default-preference';
-
+import image from '../../../images/secux_w20.png'
 const PUB_KEY = process.env.MM_PUBNUB_PUB_KEY;
 
 const styles = StyleSheet.create({
@@ -402,6 +402,7 @@ class Onboarding extends PureComponent {
 					<Text style={styles.buttonDescription}>{strings('onboarding.import')}</Text>
 				</View>
 				<View style={styles.createWrapper}>
+				<Image source={image} style={styles.image} resizeMethod={'auto'} />
 					<View style={styles.buttonWrapper}>
 						<StyledButton
 							style={styles.button}
@@ -413,6 +414,7 @@ class Onboarding extends PureComponent {
 						</StyledButton>
 					</View>
 				</View>
+
 			</View>
 		);
 	}

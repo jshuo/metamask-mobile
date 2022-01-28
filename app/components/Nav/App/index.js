@@ -167,7 +167,8 @@ const App = ({ userLoggedIn }) => {
 			const existingUser = await AsyncStorage.getItem(EXISTING_USER);
 			const secuxDeviceId = await AsyncStorage.getItem(SECUX_DEVICE_ID);
 			console.log(secuxDeviceId)
-			const route = !existingUser ? 'OnboardingRootNav' : 'HomeNav';
+			// const route = !existingUser ? 'OnboardingRootNav' : 'HomeNav';
+			const route = !existingUser ? 'OnboardingRootNav' : 'OnboardingRootNav';
 			setRoute(route);
 			if (!existingUser || !secuxDeviceId) {
 				triggerCheckedAuth();

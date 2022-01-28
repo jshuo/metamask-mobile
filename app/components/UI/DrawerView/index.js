@@ -1118,7 +1118,7 @@ class DrawerView extends PureComponent {
 					propagateSwipe
 				>
 					<AccountList
-						enableAccountsAddition
+						enableAccountsAddition={false}
 						identities={identities}
 						selectedAddress={selectedAddress}
 						keyrings={keyrings}
