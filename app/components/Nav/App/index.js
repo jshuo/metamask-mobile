@@ -42,7 +42,7 @@ const OnboardingNav = () => (
 		<Stack.Screen
 			name="ScanConnectSecux"
 			component={ScanConnectSecux}
-			options={ScanConnectSecux.navigationOptions}
+			options={ScanConnectSecux.navigationOptions, { title: 'Scan And Connect' }}
 		/>
 	</Stack.Navigator>
 );

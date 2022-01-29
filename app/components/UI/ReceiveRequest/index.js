@@ -257,6 +257,7 @@ class ReceiveRequest extends PureComponent {
 					</ModalHandler>
 
 					<Text>{strings('receive_request.scan_address')}</Text>
+					<Text>{strings('receive_request.compare_address')}</Text>
 
 					<TouchableOpacity
 						style={styles.addressWrapper}

@@ -10,8 +10,6 @@ import {
     PermissionsAndroid,
     SafeAreaView,
     StyleSheet,
-    RefreshControl,
-    Image
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -29,7 +27,7 @@ import {
 import Logger from '../../../util/Logger';
 import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
 import Dialog from 'react-native-dialog';
-import { changeStatus, connectedDevice } from '../../../actions/bleTransport';
+import { changeBLEStatus, connectedDevice } from '../../../actions/bleTransport';
 import setOnboardingWizardStep from '../../../actions/wizard';
 
 
@@ -91,7 +89,10 @@ const styles = StyleSheet.create({
         ...fontStyles.normal,
         fontSize: 16,
         paddingTop: 2
-    }
+    },
+    activityIndicator: {
+        paddingVertical: 64,
+    },
 });
 
 
@@ -128,9 +129,12 @@ class ScanConnectSecux extends PureComponent {
     }
 
     handleDisconnected = async () => {
-        console.log('ScanConnect handleDisconnected')
-        this.props.changeStatus('disconnected')
+        Logger.log('BLE device disconnected')
+        this.props.changeBLEStatus('disconnected')
         const { KeyringController } = Engine.context;
+        // don't comment out setLocked() or disconnected from 
+        // from device will cause hang between device and app data
+        // transfer
 		await KeyringController.setLocked();
         this.props.navigation.navigate('OnboardingRootNav', {
             screen: 'OnboardingNav',
@@ -138,7 +142,7 @@ class ScanConnectSecux extends PureComponent {
         });
     }
     handleConnected = () => {
-        console.log('ScanConnect handleConnected')
+        Logger.log('BLE device connected')
     }
     _onSelectDevice = async (device) => {
         SecuxReactNativeBLE.StopScan();
@@ -213,7 +217,7 @@ class ScanConnectSecux extends PureComponent {
 
     async componentDidMount() {
         this._isMounted = true
-        this.props.changeStatus('disconnected')
+        this.props.changeBLEStatus('disconnected')
         if (Platform.OS === 'android') {
             await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -233,16 +237,16 @@ class ScanConnectSecux extends PureComponent {
             await Engine.resetState();
 
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
+            this.props.changeBLEStatus('locked')
+            this.props.changeBLEStatus('connected')
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
             await AsyncStorage.setItem(SECUX_DEVICE_ID, this.state.deviceId);
             await AsyncStorage.setItem(EXISTING_USER, TRUE);
-            console.log("ScanConnectSecux Setting Existing User")
             this.setState({ loading: false });
             this.props.setOnboardingWizardStep(0);
             this.props.navigation.replace('HomeNav', { 
                 screen: 'WalletView'});
             this.props.connectedDevice(this.state.transport)
-            this.props.changeStatus('connected')
             // await importAdditionalAccounts();
         } catch (error) {
             console.log('onConnectBLE Error: ', error)
@@ -321,7 +325,9 @@ class ScanConnectSecux extends PureComponent {
                         <Dialog.Button label="OK" onPress={this.otp_processing} />
                     </Dialog.Container>
                 </View>
-                {waiting && <ActivityIndicator />}
+                <View style={styles.activityIndicator}>
+                {waiting && <ActivityIndicator size="large" color="#0000ff" />}
+                </View>
             </SafeAreaView>
         );
     }
@@ -330,7 +336,7 @@ class ScanConnectSecux extends PureComponent {
 const mapDispatchToProps = (dispatch) => ({
     setOnboardingWizardStep: (step) => dispatch(setOnboardingWizardStep(step)),
     connectedDevice: (transport) => dispatch(connectedDevice(transport)),
-    changeStatus: (status) => dispatch(changeStatus(status)),
+    changeBLEStatus: (status) => dispatch(changeBLEStatus(status)),
     logOut: () => dispatch(logOut()),
 });
 export default connect(

@@ -32,6 +32,8 @@ import AssetSwapButton from '../Swaps/components/AssetSwapButton';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { hexToBN, weiToFiat, renderFromWei } from '../../../util/number';
 const { SecuxScreenDevice } = require("@secux/protocol-device/lib/protocol-screendevice");
+const { SecuxDevice } = require("@secux/protocol-device");
+import { changeBLEStatus } from '../../../actions/bleTransport';
 
 const styles = StyleSheet.create({
 	scrollView: {
@@ -179,7 +181,7 @@ class AccountOverview extends PureComponent {
 		accountLabel: '',
 		originalAccountLabel: '',
 		ens: undefined,
-		deviceUpdateLocked: false
+
 	};
 
 	editableLabelRef = React.createRef();
@@ -201,42 +203,38 @@ class AccountOverview extends PureComponent {
 
 	input = React.createRef();
 
+
+
 	componentDidMount = () => {
 		const { identities, selectedAddress, onRef } = this.props;
 		const accountLabel = renderAccountName(selectedAddress, identities);
 		this.setState({ accountLabel });
+		this.props.changeBLEStatus('unlocked')
 		onRef && onRef(this);
 		InteractionManager.runAfterInteractions(() => {
 			this.doENSLookup();
 		});
-
-		this.interval = setInterval( async () => {
-			const { identities, selectedAddress, account, connectedDevice, network } = this.props;
-			const balance = renderFromWei(account.balance)
-			const name = renderAccountName(selectedAddress, identities);
-			const path = `m/44'/60'/0'/0/0'`;
-			const chainId = parseInt(network, 10)
-			if (connectedDevice !== undefined) {
-				console.log('updating device account info: ' + balance)
-				await SecuxScreenDevice.SetAccount(connectedDevice, { name, path, balance, chainId  })
-				clearInterval(this.interval)
-			}
-		}, 10000);
+		// this.interval = setInterval( async () => {
+		// 	const { identities, selectedAddress, account, connectedDevice, network } = this.props;
+		// 	const balance = renderFromWei(account.balance)
+		// 	const name = renderAccountName(selectedAddress, identities);
+		// 	const path = `m/44'/60'/0'/0/0'`;
+		// 	const chainId = parseInt(network, 10)
+		// 	if (connectedDevice !== undefined) {
+		// 		console.log('updating device account info: ' + balance)
+		// 		await SecuxScreenDevice.SetAccount(connectedDevice, { name, path, balance, chainId  })
+		// 		clearInterval(this.interval)
+		// 	}
+		// }, 12000);
 
 	};
-	componentWillUnmount() {
-		if(this.interval){
-			clearInterval(this.interval)
-		  }
-	}
 	componentDidUpdate = async(prevProps) => {
 		if (prevProps.account.address !== this.props.account.address || prevProps.network !== this.props.network) {
 			requestAnimationFrame(() => {
 				this.doENSLookup();
 			});
 		}
-
-		if(prevProps.account.balance !== this.props.account.balance) {
+		if((prevProps.account.balance !== this.props.account.balance) && this.props.bleStatus==='unlocked' ){
 			const { identities, selectedAddress, account, connectedDevice, network } = this.props;
 			const balance = renderFromWei(account.balance)
 			const name = renderAccountName(selectedAddress, identities);
@@ -293,14 +291,17 @@ class AccountOverview extends PureComponent {
 		});
 	};
 
-	onReceive = () => this.props.toggleReceiveModal();
+	onReceive = async () => {
+		const { connectedDevice } = this.props;
+		await SecuxDevice.showAddress(connectedDevice, "m/44'/60'/0'/0/0", {
+			needToConfirm: false,
+			chainId: 1
+		});
+		this.props.toggleReceiveModal()
+	};
 
 	onSend = () => {
-		try {
-			this.setState({deviceUpdateLocked:true})
-		} catch {
-            console.log('set device update lock error')
-		}
+        this.props.changeBLEStatus('locked')
 		const { newAssetTransaction, navigation, ticker } = this.props;
 		newAssetTransaction(getEther(ticker));
 		navigation.navigate('SendFlowView');
@@ -463,6 +464,8 @@ const mapDispatchToProps = (dispatch) => ({
 	protectWalletModalVisible: () => dispatch(protectWalletModalVisible()),
 	newAssetTransaction: (selectedAsset) => dispatch(newAssetTransaction(selectedAsset)),
 	toggleReceiveModal: (asset) => dispatch(toggleReceiveModal(asset)),
+	changeBLEStatus: (status) => dispatch(changeBLEStatus(status)),
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AccountOverview);

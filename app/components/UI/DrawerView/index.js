@@ -43,7 +43,7 @@ import AnalyticsV2, { ANALYTICS_EVENTS_V2 } from '../../../util/analyticsV2';
 import { isDefaultAccountName, doENSReverseLookup } from '../../../util/ENSUtils';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { collectiblesSelector } from '../../../reducers/collectibles';
-import { changeStatus, connectedDevice } from '../../../actions/bleTransport';
+import { changeBLEStatus } from '../../../actions/bleTransport';
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -585,9 +585,11 @@ class DrawerView extends PureComponent {
 			try {
 				// using Redux for Ble status is sufficent? 
 				// or to use react-native ble isConnected to get real time status 
-				if (bleStatus === 'connected' || await connectedDevice.isConnected()) {
-					console.log(await connectedDevice.isConnected())
-					this.props.changeStatus('disconnected')
+				if (bleStatus === 'connected' 
+				// || await connectedDevice.isConnected()
+				) {
+					// console.log(await connectedDevice.isConnected())
+					this.props.changeBLEStatus('disconnected')
 					connectedDevice.Disconnect()
 				}
 
@@ -1174,7 +1176,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-	changeStatus: (status) => dispatch(changeStatus(status)),
+	changeBLEStatus: (status) => dispatch(changeBLEStatus(status)),
 	toggleNetworkModal: () => dispatch(toggleNetworkModal()),
 	toggleAccountsModal: () => dispatch(toggleAccountsModal()),
 	toggleReceiveModal: () => dispatch(toggleReceiveModal()),

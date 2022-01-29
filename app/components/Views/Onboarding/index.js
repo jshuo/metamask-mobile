@@ -125,6 +125,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'flex-end',
 	},
+	bleDeviceImage: {
+		alignSelf: 'center',
+		width: Device.isIos() ? 270 : 135,
+		height: Device.isIos() ? 270 : 135,
+	},
 });
 
 /**
@@ -402,7 +407,7 @@ class Onboarding extends PureComponent {
 					<Text style={styles.buttonDescription}>{strings('onboarding.import')}</Text>
 				</View>
 				<View style={styles.createWrapper}>
-				<Image source={image} style={styles.image} resizeMethod={'auto'} />
+				<Image source={image} style={styles.bleDeviceImage} resizeMethod={'auto'} />
 					<View style={styles.buttonWrapper}>
 						<StyledButton
 							style={styles.button}

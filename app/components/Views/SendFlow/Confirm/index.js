@@ -62,6 +62,7 @@ import EditGasFee1559 from '../../../UI/EditGasFee1559';
 import EditGasFeeLegacy from '../../../UI/EditGasFeeLegacy';
 import CustomNonce from '../../../UI/CustomNonce';
 import AppConstants from '../../../../core/AppConstants';
+import { changeBLEStatus } from '../../../../actions/bleTransport';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -862,6 +863,7 @@ class Confirm extends PureComponent {
 			Logger.error(error, 'error while trying to send transaction (Confirm)');
 		}
 		this.setState({ transactionConfirmed: false });
+		this.props.changeBLEStatus('unlocked')
 	};
 
 	getBalanceError = (balance) => {
@@ -1385,6 +1387,7 @@ const mapDispatchToProps = (dispatch) => ({
 	setProposedNonce: (nonce) => dispatch(setProposedNonce(nonce)),
 	removeFavoriteCollectible: (selectedAddress, chainId, collectible) =>
 		dispatch(removeFavoriteCollectible(selectedAddress, chainId, collectible)),
+	changeBLEStatus: (status) => dispatch(changeBLEStatus(status)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Confirm);
