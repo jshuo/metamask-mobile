@@ -134,8 +134,9 @@ class ScanConnectSecux extends PureComponent {
         const { KeyringController } = Engine.context;
         // don't comment out setLocked() or disconnected from 
         // from device will cause hang between device and app data
-        // transfer
+        // transfer or reset EngineState
 		await KeyringController.setLocked();
+        await Engine.resetState();
         this.props.navigation.navigate('OnboardingRootNav', {
             screen: 'OnboardingNav',
             params: { screen: 'Onboarding' },
