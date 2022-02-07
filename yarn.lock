@@ -1783,9 +1783,9 @@
     web3 "^0.20.7"
     web3-provider-engine "^16.0.3"
 
-"@metamask/controllers@https://github.com/jshuo/controllers.git#b20a8fbc6e41122281d26f64fdef1b2add22ee17":
+"@metamask/controllers@https://github.com/jshuo/controllers.git#v22.0.0.secux":
   version "22.0.0"
-  resolved "https://github.com/jshuo/controllers.git#b20a8fbc6e41122281d26f64fdef1b2add22ee17"
+  resolved "https://github.com/jshuo/controllers.git#8af3983e37b28968b0f287831ff3f97ec9c8648a"
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
