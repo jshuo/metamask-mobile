@@ -12,7 +12,7 @@ const bleTransportReducer = (state = INITIAL_STATE, action) => {
 				connectedDevice: action.connectedDevice,
 			};
 		case 'CHANGE_STATUS':
-			console.log("change status:", action.bleStatus)
+			console.log("BLE change status:", action.bleStatus)
 			return {
 				...state,
 				bleStatus: action.bleStatus
