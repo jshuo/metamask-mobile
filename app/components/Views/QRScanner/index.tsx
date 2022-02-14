@@ -119,26 +119,27 @@ const QRScanner = ({ navigation, route }: Props) => {
 				const { KeyringController } = Engine.context;
 				const isUnlocked = KeyringController.isUnlocked();
 
-				if (!isUnlocked) {
-					navigation.goBack();
-					Alert.alert(
-						strings('qr_scanner.error'),
-						strings('qr_scanner.attempting_to_scan_with_wallet_locked')
-					);
-					mountedRef.current = false;
-					return;
-				}
+				// if (!isUnlocked) {
+				// 	navigation.goBack();
+				// 	Alert.alert(
+				// 		strings('qr_scanner.error'),
+				// 		strings('qr_scanner.attempting_to_scan_with_wallet_locked')
+				// 	);
+				// 	mountedRef.current = false;
+				// 	return;
+				// }
 				// Let ethereum:address go forward
-				if (content.split('ethereum:').length > 1 && !parse(content).function_name) {
+				// if (content.split('ethereum:').length > 1 && !parse('ethereum:'+content).function_name) {
 					shouldReadBarCodeRef.current = false;
-					data = parse(content);
+					data = parse('ethereum:'+content);
 					const action = 'send-eth';
 					data = { ...data, action };
 					end();
 					onScanSuccess(data, content);
 					return;
-				}
+				// }
 
+				
 				// Checking if it can be handled like deeplinks
 				const handledByDeeplink = SharedDeeplinkManager.parse(content, {
 					origin: AppConstants.DEEPLINKS.ORIGIN_QR_CODE,
