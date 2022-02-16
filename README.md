@@ -14,8 +14,7 @@ Important Note:
 
 5. If you would like to buy SecuX for Metamask Mobile development, please visit https://shop.secuxtech.com , and purchase SecuX W20/V20 with Bluetooth supports 
 
-6. if you would like to try it out without building from the open source, please download the apk from this repo, and play with it. So far we have only tested this app on Android, however, feel free to build iOS app following Metamask Mobile iOS app build instructions 
-
+6. if you would like to try it out without building from the open source, please download the apk from this repo's release, and play with it. So far we have only tested this app on Android, however, feel free to build iOS app following Metamask Mobile iOS app build instructions 
 
 Notice of Non-Affiliation and Disclaimer:
 SecuX is not affiliated with MetaMask in any way. MetaMask and the Fox logo are trademarks of ConsenSys, Inc.
