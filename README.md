@@ -4,7 +4,7 @@
 
 Important Note:
 
-1. SecuX Hardware Wallet has not been officially integrated with MetaMask Mobile. It is a proof of concept of MetaMask created by SecuX. This is an unofficial fork specifically for use with the SecuX hardware wallet. Please use cautiously and report bugs (and feedback!) to support@secuxtech.com.
+1. SecuX Hardware Wallet has not been officially integrated with MetaMask Mobile. It is a proof of concept of MetaMask Mobile created by SecuX. This is an unofficial fork specifically for use with the SecuX hardware wallet. Please use cautiously and report bugs (and feedback!) to support@secuxtech.com.
 
 2. This verson of forked Metamask does not require you to enter any password or seedphrase to create Ethereum Account.
 
