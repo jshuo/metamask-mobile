@@ -161,16 +161,8 @@ class ScanConnectSecux extends PureComponent {
                 waiting: true,
                 transport: transport
             })
-            // secux hack
-            // let otp = '42960705'showDialog
-            // console.log(otp)
-            // await transport.SendOTP(otp);
-
             // show otp dialog
             this.setState({ showDialog: true });
-
-            // this.setState({ refreshing: false })
-            // this.onConnectBLE();
 
         } catch (e) {
             Logger.log(e)
@@ -179,7 +171,7 @@ class ScanConnectSecux extends PureComponent {
         }
     }
 
-    renderItem = (item) => (
+    renderItem = ({ item }: { item: Device }) => (
         <DeviceItem device={item} onSelect={() => this._onSelectDevice(item)} />
     )
 
@@ -226,6 +218,7 @@ class ScanConnectSecux extends PureComponent {
         }
 
         this.setState(this.state);
+        SecuxReactNativeBLE.StopScan();
         SecuxReactNativeBLE.StartScan(this._AddDevice, this._DeleteDevice);
     }
 

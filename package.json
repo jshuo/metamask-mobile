@@ -108,7 +108,7 @@
     "@rnhooks/keyboard": "^0.0.3",
     "@secux/transport-reactnative": "^2.1.2",
     "@secux/app-eth": "^2.1.6",
-    "@secux/protocol-device": "^2.1.1",
+    "@secux/protocol-device": "^2.1.2",
     "@sentry/integrations": "6.3.1",
     "@sentry/react-native": "2.4.2",
     "@tradle/react-native-http": "2.0.1",

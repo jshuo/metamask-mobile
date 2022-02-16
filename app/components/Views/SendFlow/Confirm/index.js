@@ -1340,7 +1340,7 @@ class Confirm extends PureComponent {
 						{transactionConfirmed ? (
 							<ActivityIndicator size="small" color="white" />
 						) : (
-							"SecuX Send"
+							"Send"
 						)}
 					</StyledButton>
 				</View>

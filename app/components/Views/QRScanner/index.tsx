@@ -128,17 +128,25 @@ const QRScanner = ({ navigation, route }: Props) => {
 				// 	mountedRef.current = false;
 				// 	return;
 				// }
+
 				// Let ethereum:address go forward
-				// if (content.split('ethereum:').length > 1 && !parse('ethereum:'+content).function_name) {
+				if (content.split('ethereum:').length > 1 && !parse(content).function_name) {
+					shouldReadBarCodeRef.current = false;
+					data = parse(content);
+					const action = 'send-eth';
+					data = { ...data, action };
+					end();
+					onScanSuccess(data, content);
+					return;
+				} else { // secux device qr code 
 					shouldReadBarCodeRef.current = false;
 					data = parse('ethereum:'+content);
 					const action = 'send-eth';
 					data = { ...data, action };
 					end();
 					onScanSuccess(data, content);
-					return;
-				// }
-
+					return;					
+				}
 				
 				// Checking if it can be handled like deeplinks
 				const handledByDeeplink = SharedDeeplinkManager.parse(content, {

@@ -418,16 +418,6 @@ class Onboarding extends PureComponent {
 							{'Connect to SecuX W20/V20'}
 						</StyledButton>
 					</View>
-					<View style={styles.buttonWrapper}>
-						<StyledButton
-							style={styles.button}
-							type={'blue'}
-							onPress={this.onPressScanConnectSecux}
-							testID={'scan-connect-secux-button'}
-						>
-							{'Connect to CoolWallet Pro'}
-						</StyledButton>
-					</View>
 
 				</View>
 
