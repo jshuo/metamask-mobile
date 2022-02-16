@@ -1,5 +1,5 @@
 
-# MetaMask forked for SecuX Hardware Only 
+# MetaMask Mobile forked for SecuX Hardware Only 
 ⚠️⚠️Please uninstall your official Metamask Mobile App when running this fork! ⚠️⚠️
 
 Important Note:
@@ -8,7 +8,7 @@ Important Note:
 
 2. This verson of forked Metamask does not require you to enter any password or seedphrase to create Ethereum Account.
 
-3. This PoC is forked and modified from the official MetaMask Mobile v3.8.1 release. All the build instructions can be found at MetaMask Mobile github:  https://github.com/MetaMask/metamask-mobile. You, as a developer, should be able to follow the instructions on the github and build Android apk for testing purpose 
+3. This PoC is forked and modified from the official MetaMask Mobile v3.8.0 release. All the build instructions can be found at MetaMask Mobile github:  https://github.com/MetaMask/metamask-mobile. You, as a developer, should be able to follow the instructions on the github and build Android apk for testing purpose 
 
 4. Currently this PoC only supports one ETH account. For multiple ETH accounts, please use SecuX Native App / Web app
 
