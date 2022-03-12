@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 	createWrapper: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		marginBottom: 320,
+		marginBottom: 220,
 	},
 	buttonWrapper: {
 		marginBottom: 16,
@@ -406,8 +406,8 @@ class Onboarding extends PureComponent {
 				<View style={styles.importWrapper}>
 					<Text style={styles.buttonDescription}>{strings('onboarding.import')}</Text>
 				</View>
-				<View style={styles.createWrapper}>
 				<Image source={image} style={styles.bleDeviceImage} resizeMethod={'auto'} />
+				<View style={styles.createWrapper}>
 					<View style={styles.buttonWrapper}>
 						<StyledButton
 							style={styles.button}
