@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 	createWrapper: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		marginBottom: 220,
+		marginBottom: 100,
 	},
 	buttonWrapper: {
 		marginBottom: 16,

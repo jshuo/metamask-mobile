@@ -231,7 +231,6 @@ class ScanConnectSecux extends PureComponent {
             await Engine.resetState();
 
             await AsyncStorage.removeItem(NEXT_MAKER_REMINDER);
-            this.props.changeBLEStatus('locked')
             this.props.changeBLEStatus('connected')
             await KeyringController.useSecuXHardwareWallet(this.state.deviceId, this.state.transport);
             await AsyncStorage.setItem(SECUX_DEVICE_ID, this.state.deviceId);
@@ -249,6 +248,8 @@ class ScanConnectSecux extends PureComponent {
     };
 
     otp_processing = async () => {
+        
+        this.props.changeBLEStatus('locked')
         const success = await this.state.transport.SendOTP(this.state.otp);
 
         if (success) {
