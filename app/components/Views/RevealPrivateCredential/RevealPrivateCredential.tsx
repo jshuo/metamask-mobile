@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Linking,
   Platform,
+  Button
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,6 +44,11 @@ import { strings } from '../../../../locales/i18n';
 import { isQRHardwareAccount } from '../../../util/address';
 import AppConstants from '../../../core/AppConstants';
 import { createStyles } from './styles';
+import NfcManager, {
+  ByteParser,
+  NfcTech,
+  NfcEvents,
+} from 'react-native-nfc-manager';
 
 const PRIVATE_KEY = 'private_key';
 
@@ -93,8 +99,7 @@ const RevealPrivateCredential = ({
     navigation.setOptions(
       getNavigationOptionsTitle(
         strings(
-          `reveal_credential.${
-            route.params?.privateCredentialName ?? ''
+          `reveal_credential.${route.params?.privateCredentialName ?? ''
           }_title`,
         ),
         navigation,
@@ -212,6 +217,55 @@ const RevealPrivateCredential = ({
     }
   };
 
+  const backUpToNFC = async () => {
+    let tag = null; 
+    const KeyTypes = ['A', 'B'];
+    const SECTOR_TO_WRITE = 1; 
+    const KEY = KeyTypes[1];
+    const KEY_TO_USE = 'FFFFFFFFFFFF';
+ 
+    await NfcManager.registerTagEvent();
+    await NfcManager.requestTechnology(NfcTech.MifareClassic);
+    tag = await NfcManager.getTag();
+
+
+    // Convert the key to a UInt8Array
+    const key = [];
+    for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
+      key.push(parseInt(KEY_TO_USE.substring(i, i + 2), 16));
+    }
+
+    let andoridNfcManager = NfcManager.mifareClassicHandlerAndroid
+    if (KEY === KeyTypes[0]) {
+      await andoridNfcManager.mifareClassicAuthenticateA(SECTOR_TO_WRITE, key);
+    }
+    
+    await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
+    
+    tag = await andoridNfcManager.mifareClassicWriteBlock(
+     [4], [1,2,3,4]
+    );
+    // const block = await andoridNfcManager.mifareClassicSectorToBlock(
+    //   SECTOR_TO_WRITE,
+    // );
+    // // Create 1 block
+    // const data = [];
+    // for (let i = 0; i < andoridNfcManager.MIFARE_BLOCK_SIZE; i++) {
+    //   data.push(0);
+    // }
+
+    // // Fill the block with our text, but don't exceed the block size
+    // for (
+    //   let i = 0;
+    //   i < TEXT_TO_WRITE.length && i < NfcManager.MIFARE_BLOCK_SIZE;
+    //   i++
+    // ) {
+    //   data[i] = parseInt(TEXT_TO_WRITE.charCodeAt(i));
+    // }
+
+    // await andoridNfcManager.mifareClassicWriteBlock(block, data);
+  };
+
   const onPasswordChange = (pswd: string) => {
     setPassword(pswd);
   };
@@ -238,11 +292,10 @@ const RevealPrivateCredential = ({
 
     const msg = `${strings(
       `reveal_credential.${privCredentialName}_copied_${Platform.OS}`,
-    )}${
-      Device.isIos()
+    )}${Device.isIos()
         ? strings(`reveal_credential.${privCredentialName}_copied_time`)
         : ''
-    }`;
+      }`;
 
     dispatch(
       showAlert({
@@ -507,6 +560,7 @@ const RevealPrivateCredential = ({
       style={styles.wrapper}
       testID={'reveal-private-credential-screen'}
     >
+
       <ActionView
         cancelText={
           unlocked
@@ -539,6 +593,10 @@ const RevealPrivateCredential = ({
           </View>
         </>
       </ActionView>
+      <Button
+        title={"Back up Seed Phrase to NFC"}
+        onPress={() => backUpToNFC()}
+      />
       {renderModal(isPrivateKey(), privateCredentialName)}
       <ScreenshotDeterrent
         enabled={unlocked}

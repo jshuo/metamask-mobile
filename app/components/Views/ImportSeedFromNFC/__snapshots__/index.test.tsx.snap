@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportSeedFromNFC should render correctly 1`] = `
+<ImportSeedFromNFC
+  logIn={[Function]}
+  passwordSet={[Function]}
+  seedphraseBackedUp={[Function]}
+  setLockTime={[Function]}
+  setOnboardingWizardStep={[Function]}
+/>
+`;

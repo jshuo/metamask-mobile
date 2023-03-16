@@ -371,6 +371,23 @@ class Onboarding extends PureComponent {
     };
     this.handleExistingUser(action);
   };
+  onPressImportFromNFC = () => {
+    const action = async () => {
+      const metricsOptIn = await DefaultPreference.get(METRICS_OPT_IN);
+      if (metricsOptIn) {
+        this.props.navigation.push('ImportSeedFromNFC');
+        this.track(MetaMetricsEvents.WALLET_IMPORT_STARTED);
+      } else {
+        this.props.navigation.navigate('OptinMetrics', {
+          onContinue: () => {
+            this.props.navigation.replace('ImportSeedFromNFC');
+            this.track(MetaMetricsEvents.WALLET_IMPORT_STARTED);
+          },
+        });
+      }
+    };
+    this.handleExistingUser(action);
+  };
 
   track = (...eventArgs) => {
     InteractionManager.runAfterInteractions(async () => {
@@ -436,7 +453,7 @@ class Onboarding extends PureComponent {
           <View style={styles.buttonWrapper}>
             <StyledButton
               type={'normal'}
-              onPress={this.onPressImport}
+              onPress={this.onPressImportFromNFC}
               testID={WALLET_SETUP_SCREEN_IMPORT_FROM_SEED_BUTTON_ID}
             >
               {strings('import_wallet.import_from_seed_button')}

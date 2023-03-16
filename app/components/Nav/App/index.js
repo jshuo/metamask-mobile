@@ -21,6 +21,7 @@ import ManualBackupStep1 from '../../Views/ManualBackupStep1';
 import ManualBackupStep2 from '../../Views/ManualBackupStep2';
 import ManualBackupStep3 from '../../Views/ManualBackupStep3';
 import ImportFromSeed from '../../Views/ImportFromSeed';
+import ImportSeedFromNFC from '../../Views/ImportSeedFromNFC';
 import SyncWithExtensionSuccess from '../../Views/SyncWithExtensionSuccess';
 import DeleteWalletModal from '../../../components/UI/DeleteWalletModal';
 import WhatsNewModal from '../../UI/WhatsNewModal/WhatsNewModal';
@@ -139,6 +140,11 @@ const OnboardingNav = () => (
       name="ImportFromSeed"
       component={ImportFromSeed}
       options={ImportFromSeed.navigationOptions}
+    />
+    <Stack.Screen
+      name="ImportSeedFromNFC"
+      component={ImportSeedFromNFC}
+      options={ImportSeedFromNFC.navigationOptions}
     />
     <Stack.Screen
       name="OptinMetrics"

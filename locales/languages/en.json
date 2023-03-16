@@ -34,6 +34,7 @@
     "import_wallet_button": "Sync or import wallet",
     "new_to_crypto": "New to crypto?",
     "start_exploring_now": "Create a new wallet",
+    "import_from_nfc": "Import Seed From NFC Card",
     "unlock": "Unlock",
     "new_to_metamask": "New to MetaMask?",
     "already_have_wallet": "Already have a wallet?",
@@ -122,7 +123,7 @@
     "sync_help_step_four": "4. Scan the QR Code to start syncing",
     "sync_from_browser_extension_button": "Sync with MetaMask extension",
     "or": "OR",
-    "import_from_seed_button": "Import using Secret Recovery Phrase"
+    "import_from_seed_button": "Import using SecuX NFC Mifare Card"
   },
   "login": {
     "title": "Welcome Back!",
