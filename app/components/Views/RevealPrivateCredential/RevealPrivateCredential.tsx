@@ -44,11 +44,7 @@ import { strings } from '../../../../locales/i18n';
 import { isQRHardwareAccount } from '../../../util/address';
 import AppConstants from '../../../core/AppConstants';
 import { createStyles } from './styles';
-import NfcManager, {
-  ByteParser,
-  NfcTech,
-  NfcEvents,
-} from 'react-native-nfc-manager';
+import NfcManager, { NfcTech } from 'react-native-nfc-manager';
 
 const PRIVATE_KEY = 'private_key';
 
@@ -228,7 +224,6 @@ const RevealPrivateCredential = ({
     await NfcManager.requestTechnology(NfcTech.MifareClassic);
     tag = await NfcManager.getTag();
 
-
     // Convert the key to a UInt8Array
     const key = [];
     for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
@@ -239,31 +234,27 @@ const RevealPrivateCredential = ({
     if (KEY === KeyTypes[0]) {
       await andoridNfcManager.mifareClassicAuthenticateA(SECTOR_TO_WRITE, key);
     }
-    
     await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
-    
-    tag = await andoridNfcManager.mifareClassicWriteBlock(
-     [4], [1,2,3,4]
+
+    const block = await andoridNfcManager.mifareClassicSectorToBlock(
+      SECTOR_TO_WRITE,
     );
-    // const block = await andoridNfcManager.mifareClassicSectorToBlock(
-    //   SECTOR_TO_WRITE,
-    // );
-    // // Create 1 block
-    // const data = [];
-    // for (let i = 0; i < andoridNfcManager.MIFARE_BLOCK_SIZE; i++) {
-    //   data.push(0);
-    // }
+    const hexString = "30d1bd7478be8ec6cc094012bd0b669668ff2d8127e33e279fc8917d1d425ab5";
+    const data = [];
+    
+    // Remove any whitespace or non-hex characters from the hex string
+    const cleanedHexString = hexString.replace(/[^0-9a-f]/gi, "");
+    
+    // Split the hex string into an array of two-character substrings
+    const hexSubstrings = cleanedHexString.match(/.{1,2}/g);
+    
+    // Convert each substring to its corresponding integer value and store it in the hex array
+    hexSubstrings.forEach(substring => {
+      data.push(parseInt(substring, 16));
+    });
+    
+    await andoridNfcManager.mifareClassicWriteBlock(block, data);
 
-    // // Fill the block with our text, but don't exceed the block size
-    // for (
-    //   let i = 0;
-    //   i < TEXT_TO_WRITE.length && i < NfcManager.MIFARE_BLOCK_SIZE;
-    //   i++
-    // ) {
-    //   data[i] = parseInt(TEXT_TO_WRITE.charCodeAt(i));
-    // }
-
-    // await andoridNfcManager.mifareClassicWriteBlock(block, data);
   };
 
   const onPasswordChange = (pswd: string) => {
