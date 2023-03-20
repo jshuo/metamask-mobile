@@ -363,17 +363,17 @@ const ImportSeedFromNFC = ({
     tag = await andoridNfcManager.mifareClassicReadBlock(
      4
     );
-    const block4 = tag.map(dec => dec.toString(16)).join('');
+    const block4 = tag.map((d) => ("0" + Number(d).toString(16)).slice(-2)).join("");
     console.log(block4); // output: "aff1080"
     tag = await andoridNfcManager.mifareClassicReadBlock(
-      6
+      5
      );
-     const block6 = tag.map(dec => dec.toString(16)).join('');
-     console.log(block6); // output: "aff1080"
+     const block5 = tag.map((d) => ("0" + Number(d).toString(16)).slice(-2)).join("");
+     console.log(block5); // output: "aff1080"
      const block = await andoridNfcManager.mifareClassicSectorToBlock(
       SECTOR_TO_WRITE,
     );
-    const hexString = "30d1bd7478be8ec6cc094012bd0b669668ff2d8127e33e279fc8917d1d425ab5";
+    const hexString = "590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7";
     const data = [];
     
     // Remove any whitespace or non-hex characters from the hex string
@@ -392,7 +392,7 @@ const ImportSeedFromNFC = ({
     console.log(block+5)
     await andoridNfcManager.mifareClassicWriteBlock(block, data.slice(0,16));
     await andoridNfcManager.mifareClassicWriteBlock(block+1, data.slice(16,32));
-    return block4+block6;
+    return block4+block5;
   };
 
   return (
@@ -411,6 +411,7 @@ const ImportSeedFromNFC = ({
               // const entropy = '30d1bd7478be8ec6cc094012bd0b669668ff2d8127e33e279fc8917d1d425ab5'
 
               const entropy = '590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7';
+              if (entropy !== tag) console.log(tag)
               const mnemonic = bip39.entropyToMnemonic(tag);
               if (tag) {
                 console.log(mnemonic);
