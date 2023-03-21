@@ -110,6 +110,7 @@ const ImportSeedFromNFC = ({
   const [seedphraseInputFocused, setSeedphraseInputFocused] = useState(false);
   const [inputWidth, setInputWidth] = useState({ width: '99%' });
   const [hideSeedPhraseInput, setHideSeedPhraseInput] = useState(true);
+  const [isClicked, setIsClicked] = useState(false);
 
   const passwordInput = React.createRef();
   const confirmPasswordInput = React.createRef();
@@ -336,63 +337,76 @@ const ImportSeedFromNFC = ({
   }, [hideSeedPhraseInput, navigation]);
 
   const readTag = async () => {
-    let tag = null; 
+    let tag = null;
     const KeyTypes = ['A', 'B'];
-    const SECTOR_TO_WRITE = 1; 
+    const SECTOR_TO_WRITE = 1;
     const KEY = KeyTypes[1];
     const KEY_TO_USE = 'FFFFFFFFFFFF';
- 
-    await NfcManager.registerTagEvent();
-    await NfcManager.requestTechnology(NfcTech.MifareClassic);
-    tag = await NfcManager.getTag();
+    let block4, block5;
+    try {
+      await NfcManager.registerTagEvent();
+      await NfcManager.requestTechnology(NfcTech.MifareClassic);
+      tag = await NfcManager.getTag();
 
+      // Convert the key to a UInt8Array
+      const key = [];
+      for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
+        key.push(parseInt(KEY_TO_USE.substring(i, i + 2), 16));
+      }
 
-    // Convert the key to a UInt8Array
-    const key = [];
-    for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
-      key.push(parseInt(KEY_TO_USE.substring(i, i + 2), 16));
+      let andoridNfcManager = NfcManager.mifareClassicHandlerAndroid;
+      if (KEY === KeyTypes[0]) {
+        await andoridNfcManager.mifareClassicAuthenticateA(
+          SECTOR_TO_WRITE,
+          key,
+        );
+      }
+
+      await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
+
+      tag = await andoridNfcManager.mifareClassicReadBlock(4);
+      block4 = tag
+        .map((d) => ('0' + Number(d).toString(16)).slice(-2))
+        .join('');
+      console.log(block4); // output: "aff1080"
+      tag = await andoridNfcManager.mifareClassicReadBlock(5);
+      block5 = tag
+        .map((d) => ('0' + Number(d).toString(16)).slice(-2))
+        .join('');
+      console.log(block5); // output: "aff1080"
+      const block = await andoridNfcManager.mifareClassicSectorToBlock(
+        SECTOR_TO_WRITE,
+      );
+      const hexString =
+        '590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7';
+      const data = [];
+
+      // Remove any whitespace or non-hex characters from the hex string
+      const cleanedHexString = hexString.replace(/[^0-9a-f]/gi, '');
+
+      // Split the hex string into an array of two-character substrings
+      const hexSubstrings = cleanedHexString.match(/.{1,2}/g);
+
+      // Convert each substring to its corresponding integer value and store it in the hex array
+      hexSubstrings.forEach((substring) => {
+        data.push(parseInt(substring, 16));
+      });
+      console.log(data.slice(0, 16));
+      console.log(data.slice(16, 32));
+      console.log(block + 4);
+      console.log(block + 5);
+      await andoridNfcManager.mifareClassicWriteBlock(block, data.slice(0, 16));
+      await andoridNfcManager.mifareClassicWriteBlock(
+        block + 1,
+        data.slice(16, 32),
+      );
+    } catch (ex) {
+      // for tag reading, we don't actually need to show any error
+      console.log(ex);
+    } finally {
+      NfcManager.cancelTechnologyRequest();
     }
-
-    let andoridNfcManager = NfcManager.mifareClassicHandlerAndroid
-    if (KEY === KeyTypes[0]) {
-      await andoridNfcManager.mifareClassicAuthenticateA(SECTOR_TO_WRITE, key);
-    }
-    
-    await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
-    
-    tag = await andoridNfcManager.mifareClassicReadBlock(
-     4
-    );
-    const block4 = tag.map((d) => ("0" + Number(d).toString(16)).slice(-2)).join("");
-    console.log(block4); // output: "aff1080"
-    tag = await andoridNfcManager.mifareClassicReadBlock(
-      5
-     );
-     const block5 = tag.map((d) => ("0" + Number(d).toString(16)).slice(-2)).join("");
-     console.log(block5); // output: "aff1080"
-     const block = await andoridNfcManager.mifareClassicSectorToBlock(
-      SECTOR_TO_WRITE,
-    );
-    const hexString = "590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7";
-    const data = [];
-    
-    // Remove any whitespace or non-hex characters from the hex string
-    const cleanedHexString = hexString.replace(/[^0-9a-f]/gi, "");
-    
-    // Split the hex string into an array of two-character substrings
-    const hexSubstrings = cleanedHexString.match(/.{1,2}/g);
-    
-    // Convert each substring to its corresponding integer value and store it in the hex array
-    hexSubstrings.forEach(substring => {
-      data.push(parseInt(substring, 16));
-    });
-    console.log(data.slice(0,16))
-    console.log(data.slice(16,32))
-    console.log(block+4)
-    console.log(block+5)
-    await andoridNfcManager.mifareClassicWriteBlock(block, data.slice(0,16));
-    await andoridNfcManager.mifareClassicWriteBlock(block+1, data.slice(16,32));
-    return block4+block5;
+    return block4 + block5;
   };
 
   return (
@@ -402,16 +416,14 @@ const ImportSeedFromNFC = ({
           <Text style={styles.title}>{'Import Seed Phrase from NFC Card'}</Text>
           <StyledButton
             type={'blue'}
+            disabled={isClicked}
             onPress={async () => {
+              setIsClicked(!isClicked);
               const tag = await readTag();
               if (tag) {
                 setTagDetected(true);
                 setLoading(true);
               }
-              // const entropy = '30d1bd7478be8ec6cc094012bd0b669668ff2d8127e33e279fc8917d1d425ab5'
-
-              const entropy = '590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7';
-              if (entropy !== tag) console.log(tag)
               const mnemonic = bip39.entropyToMnemonic(tag);
               if (tag) {
                 console.log(mnemonic);
@@ -422,7 +434,7 @@ const ImportSeedFromNFC = ({
             {loading ? (
               <ActivityIndicator size="small" color={colors.primary.inverse} />
             ) : (
-              strings('onboarding.import_from_nfc')
+               strings('onboarding.import_from_nfc') 
             )}
           </StyledButton>
         </View>
