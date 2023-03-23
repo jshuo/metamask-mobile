@@ -374,32 +374,6 @@ const ImportSeedFromNFC = ({
         .map((d) => ('0' + Number(d).toString(16)).slice(-2))
         .join('');
       console.log(block5); // output: "aff1080"
-      const block = await andoridNfcManager.mifareClassicSectorToBlock(
-        SECTOR_TO_WRITE,
-      );
-      const hexString =
-        '590a8873749b2ace92dd9a2ab705c892a71787a549a5dbc47adef9f3189c2ca7';
-      const data = [];
-
-      // Remove any whitespace or non-hex characters from the hex string
-      const cleanedHexString = hexString.replace(/[^0-9a-f]/gi, '');
-
-      // Split the hex string into an array of two-character substrings
-      const hexSubstrings = cleanedHexString.match(/.{1,2}/g);
-
-      // Convert each substring to its corresponding integer value and store it in the hex array
-      hexSubstrings.forEach((substring) => {
-        data.push(parseInt(substring, 16));
-      });
-      console.log(data.slice(0, 16));
-      console.log(data.slice(16, 32));
-      console.log(block + 4);
-      console.log(block + 5);
-      await andoridNfcManager.mifareClassicWriteBlock(block, data.slice(0, 16));
-      await andoridNfcManager.mifareClassicWriteBlock(
-        block + 1,
-        data.slice(16, 32),
-      );
     } catch (ex) {
       // for tag reading, we don't actually need to show any error
       console.log(ex);

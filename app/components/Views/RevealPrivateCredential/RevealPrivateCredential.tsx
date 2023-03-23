@@ -45,6 +45,7 @@ import { isQRHardwareAccount } from '../../../util/address';
 import AppConstants from '../../../core/AppConstants';
 import { createStyles } from './styles';
 import NfcManager, { NfcTech } from 'react-native-nfc-manager';
+import bip39 from 'bip39';
 
 const PRIVATE_KEY = 'private_key';
 
@@ -73,6 +74,9 @@ const RevealPrivateCredential = ({
   const [isAndroidSupportedVersion, setIsAndroidSupportedVersion] =
     useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const [buttonTitle, setButtonTitle] = useState('Back up Seed Phrase to NFC');
+
 
   const selectedAddress = useSelector(
     (state: any) =>
@@ -213,48 +217,69 @@ const RevealPrivateCredential = ({
     }
   };
 
-  const backUpToNFC = async () => {
-    let tag = null; 
+  const backUpToNFC = async () => {    let tag = null;
     const KeyTypes = ['A', 'B'];
-    const SECTOR_TO_WRITE = 1; 
+    const SECTOR_TO_WRITE = 1;
     const KEY = KeyTypes[1];
     const KEY_TO_USE = 'FFFFFFFFFFFF';
- 
-    await NfcManager.registerTagEvent();
-    await NfcManager.requestTechnology(NfcTech.MifareClassic);
-    tag = await NfcManager.getTag();
+    let block4, block5;
+    try {
+      await NfcManager.registerTagEvent();
+      await NfcManager.requestTechnology(NfcTech.MifareClassic);
+      tag = await NfcManager.getTag();
+      console.log('get tag: ', tag)
 
-    // Convert the key to a UInt8Array
-    const key = [];
-    for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
-      key.push(parseInt(KEY_TO_USE.substring(i, i + 2), 16));
+      // Convert the key to a UInt8Array
+      const key = [];
+      for (let i = 0; i < KEY_TO_USE.length - 1; i += 2) {
+        key.push(parseInt(KEY_TO_USE.substring(i, i + 2), 16));
+      }
+
+      let andoridNfcManager = NfcManager.mifareClassicHandlerAndroid;
+      if (KEY === KeyTypes[0]) {
+        await andoridNfcManager.mifareClassicAuthenticateA(
+          SECTOR_TO_WRITE,
+          key,
+        );
+      }
+
+      await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
+
+
+      const block:any = await andoridNfcManager.mifareClassicSectorToBlock(
+        SECTOR_TO_WRITE,
+      );
+
+      const data:any= [];
+      console.log('clipboardPrivateCredential: ', clipboardPrivateCredential)
+      const seedPhrase = bip39.mnemonicToEntropy(clipboardPrivateCredential);
+
+      // Remove any whitespace or non-hex characters from the hex string
+      const cleanedHexString = seedPhrase.replace(/[^0-9a-f]/gi, '');
+
+      // Split the hex string into an array of two-character substrings
+      const hexSubstrings:any = cleanedHexString.match(/.{1,2}/g);
+
+      // Convert each substring to its corresponding integer value and store it in the hex array
+      hexSubstrings.forEach((substring) => {
+        data.push(parseInt(substring, 16));
+      });
+      console.log(data.slice(0, 16));
+      console.log(data.slice(16, 32));
+      console.log(block + 4);
+      console.log(block + 5);
+      await andoridNfcManager.mifareClassicWriteBlock(block, data.slice(0, 16));
+      await andoridNfcManager.mifareClassicWriteBlock(
+        block + 1,
+        data.slice(16, 32),
+      );
+    } catch (ex) {
+      // for tag reading, we don't actually need to show any error
+      console.log(ex);
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+      setButtonTitle('NFC Tag Written Successfully');
     }
-
-    let andoridNfcManager = NfcManager.mifareClassicHandlerAndroid
-    if (KEY === KeyTypes[0]) {
-      await andoridNfcManager.mifareClassicAuthenticateA(SECTOR_TO_WRITE, key);
-    }
-    await andoridNfcManager.mifareClassicAuthenticateB(SECTOR_TO_WRITE, key);
-
-    const block = await andoridNfcManager.mifareClassicSectorToBlock(
-      SECTOR_TO_WRITE,
-    );
-    const hexString = "30d1bd7478be8ec6cc094012bd0b669668ff2d8127e33e279fc8917d1d425ab5";
-    const data = [];
-    
-    // Remove any whitespace or non-hex characters from the hex string
-    const cleanedHexString = hexString.replace(/[^0-9a-f]/gi, "");
-    
-    // Split the hex string into an array of two-character substrings
-    const hexSubstrings = cleanedHexString.match(/.{1,2}/g);
-    
-    // Convert each substring to its corresponding integer value and store it in the hex array
-    hexSubstrings.forEach(substring => {
-      data.push(parseInt(substring, 16));
-    });
-    
-    await andoridNfcManager.mifareClassicWriteBlock(block, data);
-
   };
 
   const onPasswordChange = (pswd: string) => {
@@ -585,9 +610,17 @@ const RevealPrivateCredential = ({
         </>
       </ActionView>
       <Button
-        title={"Back up Seed Phrase to NFC"}
-        onPress={() => backUpToNFC()}
+        title={buttonTitle}
+        disabled={isClicked}
+        onPress={() =>               
+         { 
+          setIsClicked(!isClicked);
+          setButtonTitle('Scan to write to NFC Tag');
+          backUpToNFC()
+        }
+        }
       />
+      
       {renderModal(isPrivateKey(), privateCredentialName)}
       <ScreenshotDeterrent
         enabled={unlocked}
