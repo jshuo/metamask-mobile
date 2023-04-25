@@ -97,7 +97,7 @@ class Engine {
       );
 
       const networkControllerOpts = {
-        infuraProjectId: process.env.MM_INFURA_PROJECT_ID || NON_EMPTY,
+        infuraProjectId: "e9f62e559d264acca5fe498412c1d9b9",
         state: initialState.NetworkController,
         messenger: this.controllerMessenger.getRestricted({
           name: 'NetworkController',
